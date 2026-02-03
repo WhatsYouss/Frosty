@@ -1,0 +1,52 @@
+{
+  "required": true,
+  "package": "xyz.whatsyouss.frosty.mixin",
+  "refmap": "frosty.mixins.refmap.json",
+  "compatibilityLevel": "JAVA_21",
+  "mixins": [
+    "ArmorFeatureRendererMixin",
+    "BossBarHudMixin",
+    "CameraMixin",
+    "ChatHudMixin",
+    "ChunkOcclusionDataBuilderMixin",
+    "ClientConnectionMixin",
+    "ClientPlayerEntityMixin",
+    "ClientPlayerInteractionManagerMixin",
+    "ClientWorldMixin",
+    "ConnectScreenMixin",
+    "DisconnectedScreenMixin",
+    "EntityMixin",
+    "EntityRenderManagerMixin",
+    "EntityRendererMixin",
+    "EntityRenderStateMixin",
+    "GameRendererMixin",
+    "HeadFeatureRendererMixin",
+    "InputMixin",
+    "KeyboardInputMixin",
+    "InGameHudMixin",
+    "InGameOverlayRendererMixin",
+    "KeyboardMixin",
+    "LivingEntityMixin",
+    "LivingEntityRendererMixin",
+    "MinecraftClientMixin",
+    "MouseMixin",
+    "PlayerEntityMixin",
+    "PlayerEntityRendererMixin",
+    "PlayerInteractItemC2SPacketMixin",
+    "ScreenMixin",
+    "TextVisitFactoryMixin",
+    "Vec3dMixin",
+    "WorldRendererMixin",
+    "accessor.InGameHudAccessor",
+    "accessor.KeyBindingAccessor",
+    "accessor.MinecraftClientAccessor",
+    "accessor.ProjectionMatrix2Accessor",
+    "accessor.EntityVelocityUpdateS2CPacketAccessor"
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  },
+  "overwrites": {
+    "requireAnnotations": true
+  }
+}

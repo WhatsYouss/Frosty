@@ -1,0 +1,7 @@
+accessWidener   v2  named
+accessible field net/minecraft/client/gui/hud/InGameHud SCOREBOARD_ENTRY_COMPARATOR Ljava/util/Comparator;
+accessible method net/minecraft/client/texture/NativeImage getColor (II)I
+accessible method net/minecraft/client/network/AbstractClientPlayerEntity getPlayerListEntry ()Lnet/minecraft/client/network/PlayerListEntry;
+accessible method net/minecraft/client/input/KeyboardInput getMovementMultiplier (ZZ)F
+accessible method net/minecraft/entity/mob/ShulkerEntity getPeekAmount ()I
+accessible method net/minecraft/client/MinecraftClient doAttack ()Z
