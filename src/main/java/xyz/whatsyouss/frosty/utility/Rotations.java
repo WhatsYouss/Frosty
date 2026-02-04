@@ -51,11 +51,17 @@ public class Rotations {
     }
 
     public static void setRotate(Module module, float yaw, float pitch, int priority) {
+        if (module == null || !module.isEnabled()) {
+            return;
+        }
         rotationRequests.put(module, new RotationRequest(yaw, pitch, priority, false, 0));
         updateRotation();
     }
 
     public static void setSmoothRotate(Module module, float yaw, float pitch, int priority, float smooth) {
+        if (module == null || !module.isEnabled()) {
+            return;
+        }
         rotationRequests.put(module, new RotationRequest(yaw, pitch, priority, true, smooth));
         updateRotation();
     }
