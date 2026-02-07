@@ -26,6 +26,7 @@
     "InGameHudMixin",
     "InGameOverlayRendererMixin",
     "KeyboardMixin",
+    "LightmapTextureManagerMixin",
     "LivingEntityMixin",
     "LivingEntityRendererMixin",
     "MinecraftClientMixin",
