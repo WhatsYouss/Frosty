@@ -45,18 +45,18 @@ public class CarnivalHelper extends Module {
     // Zombie Shootout
     private int zsStickSlot = -1;
     private final List<BlockPos> zsLampPos = List.of(
-            new BlockPos(-96, 76, 31),
-            new BlockPos(-99, 77, 32),
-            new BlockPos(-102, 75, 32),
-            new BlockPos(-106, 77, 31),
-            new BlockPos(-109, 75, 30),
-            new BlockPos(-112, 76, 28),
-            new BlockPos(-115, 77, 25),
-            new BlockPos(-117, 76, 22),
-            new BlockPos(-118, 76, 19),
-            new BlockPos(-119, 75, 15),
-            new BlockPos(-119, 77, 12),
-            new BlockPos(-118, 76, 9)
+            new BlockPos(-96, 76, 61),
+            new BlockPos(-99, 77, 62),
+            new BlockPos(-102, 75, 62),
+            new BlockPos(-106, 77, 61),
+            new BlockPos(-109, 75, 60),
+            new BlockPos(-112, 76, 58),
+            new BlockPos(-115, 77, 55),
+            new BlockPos(-117, 76, 52),
+            new BlockPos(-118, 76, 49),
+            new BlockPos(-119, 75, 45),
+            new BlockPos(-119, 77, 42),
+            new BlockPos(-118, 76, 39)
     );
 
     // Catch A Fish
@@ -511,8 +511,8 @@ public class CarnivalHelper extends Module {
         }
 
         if (currentPlay == 1) {
-            BlockPos minPos = new BlockPos(-112, 72, -11);
-            BlockPos maxPos = new BlockPos(-106, 72, -5);
+            BlockPos minPos = new BlockPos(-112, 72, 19);
+            BlockPos maxPos = new BlockPos(-106, 72, 25);
 
             for (int x = minPos.getX(); x <= maxPos.getX(); x++) {
                 for (int z = minPos.getZ(); z <= maxPos.getZ(); z++) {
@@ -581,8 +581,8 @@ public class CarnivalHelper extends Module {
     }
 
     private boolean isInRange(BlockPos pos) {
-        BlockPos minPos = new BlockPos(-112, 72, -11);
-        BlockPos maxPos = new BlockPos(-106, 72, -5);
+        BlockPos minPos = new BlockPos(-112, 72, 19);
+        BlockPos maxPos = new BlockPos(-106, 72, 25);
         return pos.getX() >= minPos.getX() && pos.getX() <= maxPos.getX() &&
                 pos.getZ() >= minPos.getZ() && pos.getZ() <= maxPos.getZ() &&
                 pos.getY() == minPos.getY();

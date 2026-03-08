@@ -47,36 +47,22 @@ public class Frosty implements ModInitializer {
 
 	@EventHandler
 	public void onPreUpdate(PreUpdateEvent e) {
+		if (!modulesInitialized) {
+			ConfigManager.loadConfig();
+			ConfigManager.loadServerConfig();
+			modulesInitialized = true;
+		}
 		if (Utils.nullCheck()) {
 			for (Module module : ModuleManager.getModules()) {
 				if (mc.currentScreen == null) {
 					module.onKeyBind();
-				}
-				else if (mc.currentScreen instanceof ClickGui) {
+				} else if (mc.currentScreen instanceof ClickGui) {
 					module.guiUpdate();
 				}
 				if (module.isEnabled()) {
 					module.onUpdate();
 				}
 			}
-			for (Module module : ModuleManager.getModules()) {
-				if (mc.currentScreen == null) {
-					module.onKeyBind();
-				}
-				else if (mc.currentScreen instanceof ClickGui) {
-					module.guiUpdate();
-				}
-				if (module.isEnabled()) {
-					module.onUpdate();
-				}
-			}
-			if (Frosty.modulesInitialized) return;
-			for (Module module : ModuleManager.getModules()) {
-				if (module.shouldEnable) {
-					module.enable();
-				}
-			}
-			Frosty.modulesInitialized = true;
 		}
 	}
 
@@ -88,15 +74,14 @@ public class Frosty implements ModInitializer {
 
 	@Override
 	public void onInitialize() {
+		mc = MinecraftClient.getInstance();
 		moduleManager.register();
 		commandManager.register();
-		mc = MinecraftClient.getInstance();
 		EVENT_BUS.registerLambdaFactory("xyz.whatsyouss.frosty", (lookupInMethod, klass) -> (MethodHandles.Lookup) lookupInMethod.invoke(null, klass, MethodHandles.lookup()));
 		EVENT_BUS.subscribe(this);
 		EVENT_BUS.subscribe(new Rotations());
 		ConfigManager.createConfigDir();
-		ConfigManager.loadConfig();
-		ConfigManager.loadServerConfig();
+		modulesInitialized = false;
 	}
 
 	public static void registerCapeTexture(Identifier id, File file) {

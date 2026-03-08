@@ -6,7 +6,7 @@ import xyz.whatsyouss.frosty.settings.Setting;
 
 public class ButtonSetting extends Setting {
     private String name, cnName;
-    private boolean isEnabled;
+    public boolean isEnabled;
     public boolean isMethodButton;
     private Runnable method;
 

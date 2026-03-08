@@ -17,7 +17,7 @@ public class MoveFix extends Module {
     public MoveFix() {
         super("MoveFix", category.Other);
 
-        this.registerSetting(foragingOnly = new ButtonSetting("Foraging Island only", true));
+        this.registerSetting(foragingOnly = new ButtonSetting("Foraging Island only", false));
     }
 
     @Override

@@ -150,7 +150,11 @@ public class ConfigManager {
                 if (module.ignoreOnSave) continue;
 
                 JsonObject moduleObject = new JsonObject();
-                moduleObject.addProperty("enabled", module.isEnabled());
+                boolean shouldBeEnabled = module.isEnabled();
+                if (module.getName().equalsIgnoreCase("ClickGui")) {
+                    shouldBeEnabled = false;
+                }
+                moduleObject.addProperty("enabled", shouldBeEnabled);
                 moduleObject.addProperty("keybind", module.getKeycode());
                 moduleObject.addProperty("hidden", module.isHidden());
 
@@ -193,9 +197,9 @@ public class ConfigManager {
 
                 JsonObject moduleObject = config.getAsJsonObject(module.getName());
                 if (moduleObject.get("enabled").getAsBoolean() && !module.isEnabled()) {
-                    module.shouldEnable = true;
+                    module.enable();
                 } else if (!moduleObject.get("enabled").getAsBoolean() && module.isEnabled()) {
-                    module.shouldEnable = false;
+                    module.disable();
                 }
 
                 if (moduleObject.has("keybind")) {

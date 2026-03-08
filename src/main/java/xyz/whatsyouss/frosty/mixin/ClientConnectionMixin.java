@@ -61,17 +61,16 @@ public abstract class ClientConnectionMixin {
         String[] args = new String[parts.length - 1];
         System.arraycopy(parts, 1, args, 0, args.length);
 
-        Command command;
-        for (Command c : CommandManager.getCommands()) {
-            if (commandName.toLowerCase().equals(c.getName()) || commandName.toLowerCase().equals(c.getAliases())) {
-                command = CommandManager.getCommandByName(commandName);
-                if (command != null) {
-                    command.execute(args);
-                } else {
-                    Utils.addChatMessage("§cUnknown command: " + commandName);
-                    return;
-                }
+        Command command = CommandManager.getCommandByName(commandName.toLowerCase());
+
+        if (command != null) {
+            try {
+                command.execute(args);
+            } catch (Exception e) {
+                Utils.addChatMessage("§cError executing command: " + e.getMessage());
             }
+        } else {
+            Utils.addChatMessage("§cUnknown command: " + commandName);
         }
     }
 }

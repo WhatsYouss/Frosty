@@ -31,9 +31,9 @@ public class CommandManager {
         return commands;
     }
 
-    public static Command getCommandByName(String commandName) {
+    public static Command getCommandByName(String input) {
         for (Command c : commands) {
-            if (c.getName().equals(commandName)) {
+            if (c.getName().equalsIgnoreCase(input) || c.getAliases().equalsIgnoreCase(input)) {
                 return c;
             }
         }
