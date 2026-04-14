@@ -2,6 +2,7 @@ package xyz.whatsyouss.frosty.modules.impl.other;
 
 import meteordevelopment.orbit.EventHandler;
 import net.minecraft.block.BlockState;
+import net.minecraft.block.Blocks;
 import net.minecraft.item.Items;
 import net.minecraft.util.Hand;
 import net.minecraft.util.hit.BlockHitResult;
@@ -92,7 +93,7 @@ public class GhostBlock extends Module {
             BlockPos targetPos = hitResult.getBlockPos();
 
             BlockState state = mc.world.getBlockState(targetPos);
-            if (!state.isAir() && state.getHardness(mc.world, targetPos) >= 0) {
+            if (!state.isAir() && state.getBlock() != Blocks.CHEST && state.getBlock() != Blocks.LEVER && state.getHardness(mc.world, targetPos) >= 0) {
                 mc.player.swingHand(Hand.MAIN_HAND);
                 mc.world.setBlockState(targetPos, net.minecraft.block.Blocks.AIR.getDefaultState(), 3);
             }

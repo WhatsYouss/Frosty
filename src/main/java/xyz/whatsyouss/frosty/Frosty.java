@@ -47,11 +47,6 @@ public class Frosty implements ModInitializer {
 
 	@EventHandler
 	public void onPreUpdate(PreUpdateEvent e) {
-		if (!modulesInitialized) {
-			ConfigManager.loadConfig();
-			ConfigManager.loadServerConfig();
-			modulesInitialized = true;
-		}
 		if (Utils.nullCheck()) {
 			for (Module module : ModuleManager.getModules()) {
 				if (mc.currentScreen == null) {
@@ -81,7 +76,6 @@ public class Frosty implements ModInitializer {
 		EVENT_BUS.subscribe(this);
 		EVENT_BUS.subscribe(new Rotations());
 		ConfigManager.createConfigDir();
-		modulesInitialized = false;
 	}
 
 	public static void registerCapeTexture(Identifier id, File file) {

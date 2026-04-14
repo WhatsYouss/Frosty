@@ -4,6 +4,7 @@ import xyz.whatsyouss.frosty.modules.impl.client.*;
 import xyz.whatsyouss.frosty.modules.impl.combat.AutoClicker;
 import xyz.whatsyouss.frosty.modules.impl.combat.KillAura;
 import xyz.whatsyouss.frosty.modules.impl.combat.Velocity;
+import xyz.whatsyouss.frosty.modules.impl.farming.CropNuker;
 import xyz.whatsyouss.frosty.modules.impl.farming.GardenCleaner;
 import xyz.whatsyouss.frosty.modules.impl.fishing.AutoFish;
 import xyz.whatsyouss.frosty.modules.impl.foraging.LushlilacNuker;
@@ -75,6 +76,10 @@ public class ModuleManager {
     public static CarnivalHelper carnivalHelper;
     public static GardenCleaner gardenCleaner;
     public static Cape cape;
+    public static CropNuker cropNuker;
+    public static StarredMobESP starredMobESP;
+//    public static SecretAura secretAura;
+//    public static MithrilMacro mithrilMacro;
 
     public void register() {
         this.addModule(tps = new TPS());
@@ -124,6 +129,10 @@ public class ModuleManager {
         this.addModule(carnivalHelper = new CarnivalHelper());
         this.addModule(gardenCleaner = new GardenCleaner());
         this.addModule(cape = new Cape());
+        this.addModule(cropNuker = new CropNuker());
+        this.addModule(starredMobESP = new StarredMobESP());
+//        this.addModule(secretAura = new SecretAura());
+//        this.addModule(mithrilMacro = new MithrilMacro());
         modules.sort(Comparator.comparing(Module::getName));
     }
 

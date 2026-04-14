@@ -121,7 +121,7 @@ public class ClickGui extends Screen {
         // Draw GUI bg
         context.fill((int) (x / scale), (int) (y / scale), (int) ((x + width) / scale), (int) ((y + height) / scale), isLight ? new Color(250, 250, 250).getRGB() : new Color(50, 50, 50).getRGB());
         context.fill((int) (x / scale), (int) (y / scale), (int) ((x + width) / scale), (int) ((y + 20) / scale), isLight ? new Color(100, 100, 255).getRGB() : new Color(60, 60, 180).getRGB());
-        context.drawCenteredTextWithShadow(mc.textRenderer, "Frosty 1.0.0", (int) ((x + width / 2) / scale), (int) ((y + 6) / scale), Color.WHITE.getRGB());
+        context.drawCenteredTextWithShadow(mc.textRenderer, "Frosty 1.0.2", (int) ((x + width / 2) / scale), (int) ((y + 6) / scale), Color.WHITE.getRGB());
 
         context.fill((int) ((x + 5) / scale), (int) ((y + 25) / scale), (int) ((x + 65) / scale), (int) ((y + height - 5) / scale), isLight ? new Color(230, 230, 230).getRGB() : new Color(70, 70, 70).getRGB());
         context.fill((int) ((x + 75) / scale), (int) ((y + 25) / scale), (int) ((x + width - 5) / scale), (int) ((y + height - 5) / scale), isLight ?  new Color(240, 240, 240).getRGB() : new Color(60, 60, 60).getRGB());

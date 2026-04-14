@@ -70,8 +70,11 @@ public class AutoClicker extends Module {
                 pressingRight = true;
             }
         } else if (event.action == KeyAction.Release) {
-            pressingLeft = false;
-            pressingRight = false;
+            if (event.button == mc.options.attackKey.getDefaultKey().getCode()) {
+                pressingLeft = false;
+            } else if (event.button == mc.options.useKey.getDefaultKey().getCode()) {
+                pressingRight = false;
+            }
         }
     }
 

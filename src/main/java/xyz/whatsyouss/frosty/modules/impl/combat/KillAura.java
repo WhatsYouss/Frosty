@@ -1,6 +1,8 @@
 package xyz.whatsyouss.frosty.modules.impl.combat;
 
 import meteordevelopment.orbit.EventHandler;
+import net.minecraft.entity.mob.MobEntity;
+import net.minecraft.entity.mob.Monster;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.network.packet.c2s.play.PlayerActionC2SPacket;
 import net.minecraft.network.packet.c2s.play.PlayerInteractEntityC2SPacket;
@@ -20,7 +22,7 @@ import xyz.whatsyouss.frosty.utility.*;
 
 public class KillAura extends Module {
 
-    private ButtonSetting requirePress, autoblockRequirePress;
+    private ButtonSetting player, requirePress, autoblockRequirePress;
     private SliderSetting aps, attackRange, swingRange;
 
     private boolean lcing, rcing, blocking;
@@ -33,6 +35,7 @@ public class KillAura extends Module {
         this.registerSetting(aps = new SliderSetting("APS", 14, 1, 20, 1));
         this.registerSetting(swingRange = new SliderSetting("Swing range", 4.5, 3, 7, 0.1));
         this.registerSetting(attackRange = new SliderSetting("Attack range", 3.2, 3, 5, 0.1));
+        this.registerSetting(player = new ButtonSetting("Player", false));
         this.registerSetting(requirePress = new ButtonSetting("Require press", false));
     }
 
@@ -127,8 +130,12 @@ public class KillAura extends Module {
     private boolean isValidTarget(Entity entity) {
         if (entity == null || entity == mc.player) return false;
         if (!entity.isAlive()) return false;
-        if (entity instanceof PlayerEntity && AntiBot.isBot((PlayerEntity) entity)) return false;
-
+        if (!(entity instanceof MobEntity)) {
+            if (player.isToggled() && entity instanceof PlayerEntity && !AntiBot.isBot((PlayerEntity) entity)) {
+                return true;
+            }
+            return false;
+        }
         return true;
     }
 
