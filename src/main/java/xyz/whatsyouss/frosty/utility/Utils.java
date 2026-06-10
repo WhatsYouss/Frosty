@@ -55,6 +55,12 @@ public class Utils {
         }
     }
 
+    public static void addModuleMessage(String moduleName, String message) {
+        if (mc.player != null) {
+            mc.player.sendMessage(Text.literal("§7[§9F§br§9o§bs§9t§by§7] " + "§7[§f§l" + moduleName + "§7] " + message), false);
+        }
+    }
+
     public static boolean nullCheck() {
         return mc.player != null && mc.world != null;
     }

@@ -9,6 +9,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import xyz.whatsyouss.frosty.Frosty;
 import xyz.whatsyouss.frosty.events.impl.MouseButtonEvent;
 import xyz.whatsyouss.frosty.events.impl.MouseScrollEvent;
+import xyz.whatsyouss.frosty.modules.ModuleManager;
 import xyz.whatsyouss.frosty.utility.Input;
 import xyz.whatsyouss.frosty.utility.KeyAction;
 
@@ -29,6 +30,20 @@ public abstract class MouseMixin {
     @Inject(method = "onMouseScroll", at = @At("HEAD"), cancellable = true)
     private void onMouseScroll(long window, double horizontal, double vertical, CallbackInfo ci) {
         if (Frosty.EVENT_BUS.post(MouseScrollEvent.get(vertical)).isCancelled()) {
+            ci.cancel();
+        }
+    }
+
+    @Inject(method = "lockCursor", at = @At("HEAD"), cancellable = true)
+    private void onLockCursor(CallbackInfo ci) {
+        if (ModuleManager.ungrabMouse != null && ModuleManager.ungrabMouse.isEnabled()) {
+            ci.cancel();
+        }
+    }
+
+    @Inject(method = "updateMouse", at = @At("HEAD"), cancellable = true)
+    private void onUpdateMouse(CallbackInfo ci) {
+        if (ModuleManager.ungrabMouse != null && ModuleManager.ungrabMouse.isEnabled()) {
             ci.cancel();
         }
     }

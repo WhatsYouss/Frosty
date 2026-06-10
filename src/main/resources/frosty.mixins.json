@@ -38,6 +38,7 @@
     "ScreenMixin",
     "TextVisitFactoryMixin",
     "Vec3dMixin",
+    "WorldChunkMixin",
     "WorldRendererMixin",
     "accessor.InGameHudAccessor",
     "accessor.KeyBindingAccessor",

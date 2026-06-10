@@ -139,4 +139,14 @@ public class RotationUtils {
 
         return entityHit != null && entityHit.getEntity() == target;
     }
+
+    public static void aimAtEntity(Entity target, float heightFraction, float smoothness) {
+        if (mc.player == null || target == null) return;
+        Vec3d aimPos    = target.getEntityPos().add(0,
+                Math.max(0.1, target.getHeight() * heightFraction), 0);
+        Vec3d playerPos = mc.player.getEyePos();
+        float[] angles  = getYawPitchTo(playerPos, aimPos);
+        setYawTo(angles[0], smoothness);
+        setPitchTo(angles[1], smoothness);
+    }
 }

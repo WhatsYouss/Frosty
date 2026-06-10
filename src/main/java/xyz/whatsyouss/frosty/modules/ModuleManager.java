@@ -4,17 +4,18 @@ import xyz.whatsyouss.frosty.modules.impl.client.*;
 import xyz.whatsyouss.frosty.modules.impl.combat.AutoClicker;
 import xyz.whatsyouss.frosty.modules.impl.combat.KillAura;
 import xyz.whatsyouss.frosty.modules.impl.combat.Velocity;
-import xyz.whatsyouss.frosty.modules.impl.farming.CropNuker;
-import xyz.whatsyouss.frosty.modules.impl.farming.GardenCleaner;
+import xyz.whatsyouss.frosty.modules.impl.farming.*;
 import xyz.whatsyouss.frosty.modules.impl.fishing.AutoFish;
 import xyz.whatsyouss.frosty.modules.impl.foraging.LushlilacNuker;
 import xyz.whatsyouss.frosty.modules.impl.foraging.SeaLumiesNuker;
 import xyz.whatsyouss.frosty.modules.impl.foraging.WoodNuker;
+import xyz.whatsyouss.frosty.modules.impl.fun.QMaths;
+import xyz.whatsyouss.frosty.modules.impl.fun.Spammer;
+import xyz.whatsyouss.frosty.modules.impl.fun.WBMacro;
 import xyz.whatsyouss.frosty.modules.impl.hunting.AutoReel;
 import xyz.whatsyouss.frosty.modules.impl.hunting.Hideonleaf;
-import xyz.whatsyouss.frosty.modules.impl.mining.FrozenTreasure;
-import xyz.whatsyouss.frosty.modules.impl.mining.NoBreakReset;
-import xyz.whatsyouss.frosty.modules.impl.mining.SandNuker;
+import xyz.whatsyouss.frosty.modules.impl.mining.*;
+import xyz.whatsyouss.frosty.modules.impl.movement.Fly;
 import xyz.whatsyouss.frosty.modules.impl.movement.GuiMove;
 import xyz.whatsyouss.frosty.modules.impl.movement.Sprint;
 import xyz.whatsyouss.frosty.modules.impl.other.*;
@@ -79,7 +80,17 @@ public class ModuleManager {
     public static CropNuker cropNuker;
     public static StarredMobESP starredMobESP;
 //    public static SecretAura secretAura;
-//    public static MithrilMacro mithrilMacro;
+    public static MithrilMacro mithrilMacro;
+    public static UngrabMouse ungrabMouse;
+//    public static CommissionMacro commissionMacro;
+    public static QMaths qMaths;
+    public static WBMacro wbMacro;
+    public static FarmingMacro farmingMacro;
+    public static FarmingProtector farmingProtector;
+    public static PestESP pestESP;
+    public static PestCleaner pestCleaner;
+    public static Spammer spammer;
+    public static Fly fly;
 
     public void register() {
         this.addModule(tps = new TPS());
@@ -132,7 +143,17 @@ public class ModuleManager {
         this.addModule(cropNuker = new CropNuker());
         this.addModule(starredMobESP = new StarredMobESP());
 //        this.addModule(secretAura = new SecretAura());
-//        this.addModule(mithrilMacro = new MithrilMacro());
+        this.addModule(mithrilMacro = new MithrilMacro());
+        this.addModule(ungrabMouse = new UngrabMouse());
+//        this.addModule(commissionMacro = new CommissionMacro());
+        this.addModule(qMaths = new QMaths());
+        this.addModule(wbMacro = new WBMacro());
+        this.addModule(farmingMacro = new FarmingMacro());
+        this.addModule(farmingProtector = new FarmingProtector());
+        this.addModule(pestCleaner = new PestCleaner());
+        this.addModule(pestESP = new PestESP());
+        this.addModule(spammer = new Spammer());
+        this.addModule(fly = new Fly());
         modules.sort(Comparator.comparing(Module::getName));
     }
 

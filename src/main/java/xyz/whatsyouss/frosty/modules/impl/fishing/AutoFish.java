@@ -154,7 +154,7 @@ public class AutoFish extends Module {
             if (rodSlot == mc.player.getInventory().getSelectedSlot()) {
                 return;
             }
-            Utils.addChatMessage("Item changed, disable module!");
+            Utils.addChatMessage("§7[§f§lAutoFish§7] §cItem changed, disable module!");
             failed = true;
             this.disable();
         }

@@ -18,6 +18,7 @@ import xyz.whatsyouss.frosty.events.impl.SettingUpdateEvent;
 import xyz.whatsyouss.frosty.gui.ClickGui;
 import xyz.whatsyouss.frosty.modules.Module;
 import xyz.whatsyouss.frosty.modules.ModuleManager;
+import xyz.whatsyouss.frosty.utility.PathfinderUtils;
 import xyz.whatsyouss.frosty.utility.Rotations;
 import xyz.whatsyouss.frosty.utility.Utils;
 
@@ -75,6 +76,7 @@ public class Frosty implements ModInitializer {
 		EVENT_BUS.registerLambdaFactory("xyz.whatsyouss.frosty", (lookupInMethod, klass) -> (MethodHandles.Lookup) lookupInMethod.invoke(null, klass, MethodHandles.lookup()));
 		EVENT_BUS.subscribe(this);
 		EVENT_BUS.subscribe(new Rotations());
+		EVENT_BUS.subscribe(PathfinderUtils.getInstance());
 		ConfigManager.createConfigDir();
 	}
 

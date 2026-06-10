@@ -126,7 +126,7 @@ public class AutoClicker extends Module {
                     }
                 }
                 leftClickTimer++;
-                int randCps = Utils.getAPSToTicks(cps, 20);
+                int randCps = (int) (20 / (rand.nextInt((int) (cps.getInputMax() - cps.getInputMin() + 1)) + cps.getInputMin()));
                 if (leftClickTimer > randCps) {
                     Utils.leftClick();
                     leftClickTimer = 0;

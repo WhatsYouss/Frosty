@@ -1,7 +1,6 @@
 package xyz.whatsyouss.frosty.utility;
 
 import com.mojang.blaze3d.vertex.VertexFormat;
-import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.font.TextRenderer;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.render.*;
@@ -9,14 +8,8 @@ import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.entity.Entity;
 import net.minecraft.util.math.*;
 import org.joml.Matrix4f;
-import org.joml.Vector3f;
-import org.joml.Vector4f;
-import org.lwjgl.BufferUtils;
-import org.lwjgl.opengl.GL11;
 
 import java.awt.*;
-import java.nio.FloatBuffer;
-import java.nio.IntBuffer;
 
 import static org.lwjgl.opengl.GL11.*;
 import static xyz.whatsyouss.frosty.Frosty.mc;
@@ -220,5 +213,44 @@ public class RenderUtils {
     public static void drawFullBlock(MatrixStack stack, BlockPos pos, Color color, float lineWidth, float fillAlpha) {
         drawBlockFilled(stack, pos, color, fillAlpha);
         drawBlockOutline(stack, pos, color, lineWidth);
+    }
+
+    public static void drawText3D(MatrixStack stack, String text, double x, double y, double z, Color color, float scale, boolean fillBackground) {
+        if (mc.getEntityRenderDispatcher().camera == null) return;
+
+        double renderX = x - mc.getEntityRenderDispatcher().camera.getPos().getX();
+        double renderY = y - mc.getEntityRenderDispatcher().camera.getPos().getY();
+        double renderZ = z - mc.getEntityRenderDispatcher().camera.getPos().getZ();
+
+        stack.push();
+        stack.translate(renderX, renderY, renderZ);
+
+        stack.multiply(mc.getEntityRenderDispatcher().camera.getRotation());
+
+        stack.scale(-scale, -scale, scale);
+
+        float width = mc.textRenderer.getWidth(text);
+        float textX = -width / 2.0f;
+        float textY = -4.0f;
+
+        Matrix4f matrix = stack.peek().getPositionMatrix();
+        VertexConsumerProvider.Immediate immediate = mc.getBufferBuilders().getEntityVertexConsumers();
+
+        if (fillBackground) {
+            int bgCol = 0x40000000;
+            mc.textRenderer.draw(text, textX, textY, color.getRGB(), false, matrix, immediate,
+                    TextRenderer.TextLayerType.SEE_THROUGH, bgCol, 15728880);
+        } else {
+            mc.textRenderer.draw(text, textX, textY, color.getRGB(), false, matrix, immediate,
+                    TextRenderer.TextLayerType.NORMAL, 0, 15728880);
+        }
+
+        immediate.draw();
+
+        stack.pop();
+    }
+
+    public static void drawText3D(MatrixStack stack, String text, double x, double y, double z, Color color) {
+        drawText3D(stack, text, x, y, z, color, 1f, true);
     }
 }

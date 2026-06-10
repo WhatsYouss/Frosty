@@ -117,7 +117,9 @@ public class Module {
     }
 
     public void setEnabled(boolean enabled) {
-        this.enabled = enabled;
+        if (this.isEnabled() != enabled) {
+            this.enabled = enabled;
+        }
     }
 
     public String getName() {
@@ -271,6 +273,6 @@ public class Module {
     }
 
     public static enum category {
-        Combat, Movement, Render, Other, Client, Fishing, Foraging, Hunting, Mining, Farming
+        Combat, Movement, Render, Other, Client, Fishing, Foraging, Hunting, Mining, Farming, Fun
     }
 }

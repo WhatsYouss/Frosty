@@ -14,6 +14,7 @@ public class CommandManager {
     public static ItemCommand itemCommand;
     public static PosCommand posCommand;
     public static ToggleCommand toggleCommand;
+    public static FarmingCommand farmingCommand;
 
     public void register() {
         this.addCommand(bindCommand = new BindCommand());
@@ -21,6 +22,7 @@ public class CommandManager {
         this.addCommand(itemCommand = new ItemCommand());
         this.addCommand(posCommand = new PosCommand());
         this.addCommand(toggleCommand = new ToggleCommand());
+        this.addCommand(farmingCommand = new FarmingCommand());
     }
 
     public void addCommand(Command m) {
