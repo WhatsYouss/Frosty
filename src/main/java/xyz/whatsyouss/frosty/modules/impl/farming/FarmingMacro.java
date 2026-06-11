@@ -305,6 +305,8 @@ public class FarmingMacro extends Module {
         preWarpTicks = 0;
 
         if (pestCleaner.isToggled() && rewarpOnly.isToggled() && checkAliveThreshold()) {
+            state = State.IDLE;
+            pauseForPestClean();
             return;
         }
 
