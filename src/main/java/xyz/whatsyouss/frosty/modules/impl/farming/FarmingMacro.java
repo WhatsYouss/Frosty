@@ -130,7 +130,6 @@ public class FarmingMacro extends Module {
         warpTimeout = 0;
         preWarpPos = null;
         activeKey = null;
-        pestPaused = false;
         running = true;
 
         releaseAll();
@@ -184,7 +183,7 @@ public class FarmingMacro extends Module {
             return;
         }
 
-        setKeyPressed(mc.options.keyAttack, true);
+        mc.startAttack();
 
         int slot = findHoeSlot();
         if (slot != -1) {
@@ -544,7 +543,7 @@ public class FarmingMacro extends Module {
                 color = Color.RED;
             }
 
-            RenderUtils.drawBox(event.getMatrix(), bp, color, 2f);
+            RenderUtils.drawBox(event.getMatrix(), bp, color, 2f, false);
 
             String label = "#" + (i + 1);
             if (running && i == targetIndex) {

@@ -116,6 +116,6 @@ public class ChestESP extends Module {
     }
 
     private void renderChestESP(PoseStack matrices, AABB box) {
-        RenderUtils.drawBox(matrices, box, new Color(200, 125, 0), 5f);
+        RenderUtils.drawBox(matrices, box, new Color(200, 125, 0), 5f, false);
     }
 }

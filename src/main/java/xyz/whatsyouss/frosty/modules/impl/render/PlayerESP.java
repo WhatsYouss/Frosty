@@ -61,9 +61,9 @@ public class PlayerESP extends Module {
                 new Color(255, 255, 255, 150);
 
         if (fill.isToggled()) {
-            RenderUtils.drawBoxFilled(matrices, box, new Color(color.getRed(), color.getGreen(), color.getBlue(), 50));
+            RenderUtils.drawBoxFilled(matrices, box, new Color(color.getRed(), color.getGreen(), color.getBlue(), 50), false);
         }
 
-        RenderUtils.drawBox(matrices, box, color, 2.0);
+        RenderUtils.drawBox(matrices, box, color, 2f, false);
     }
 }

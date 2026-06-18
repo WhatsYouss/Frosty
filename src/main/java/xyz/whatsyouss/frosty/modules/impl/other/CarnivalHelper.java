@@ -522,13 +522,13 @@ public class CarnivalHelper extends Module {
                         if (state != null) {
                             switch (state) {
                                 case 1:
-                                    RenderUtils.drawBlockFilled(event.getMatrix(), pos, Color.GREEN, 0.1f);
+                                    RenderUtils.drawBlockFilled(event.getMatrix(), pos, Color.GREEN, 0.1f, false);
                                     break;
                                 case 2:
-                                    RenderUtils.drawBlockFilled(event.getMatrix(), pos, Color.YELLOW, 0.1f);
+                                    RenderUtils.drawBlockFilled(event.getMatrix(), pos, Color.YELLOW, 0.1f, false);
                                     break;
                                 case 3:
-                                    RenderUtils.drawBlockFilled(event.getMatrix(), pos, Color.RED, 0.1f);
+                                    RenderUtils.drawBlockFilled(event.getMatrix(), pos, Color.RED, 0.1f, false);
                                     break;
                             }
                         }
@@ -537,7 +537,7 @@ public class CarnivalHelper extends Module {
             }
 
             if (fdCurrentTarget != null && isInRange(fdCurrentTarget)) {
-                RenderUtils.drawBlockFilled(event.getMatrix(), fdCurrentTarget, Color.BLACK, 0.3f);
+                RenderUtils.drawBlockFilled(event.getMatrix(), fdCurrentTarget, Color.BLACK, 0.3f, false);
             }
         }
     }

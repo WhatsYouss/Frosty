@@ -25,6 +25,7 @@
     "KeyboardHandlerMixin",
     "KeyboardInputMixin",
     "LevelChunkMixin",
+    "LevelRendererMixin",
     "LightmapMixin",
     "LivingEntityMixin",
     "LivingEntityRendererMixin",

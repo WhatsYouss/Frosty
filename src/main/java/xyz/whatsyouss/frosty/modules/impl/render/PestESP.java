@@ -34,7 +34,7 @@ public class PestESP extends Module {
         }
         for (Entity entity : mc.level.entitiesForRendering()) {
             if (entity instanceof Bat || entity instanceof Silverfish) {
-                RenderUtils.outlineEntity(event.getMatrix(), entity, Color.CYAN, 2f);
+                RenderUtils.outlineEntity(event.getMatrix(), entity, Color.CYAN, 2f, false);
             }
         }
     }

@@ -32,7 +32,7 @@ public class StarredMobESP extends Module {
                     if (Utils.getLiteralByText(entity.getCustomName()).contains(star)) {
                        Entity target = findTargetUnder(armorStand);
                        if (target instanceof LivingEntity living && living != mc.player) {
-                           RenderUtils.outlineEntity(event.getMatrix(), living, Color.CYAN, 2.0f);
+                           RenderUtils.outlineEntity(event.getMatrix(), living, Color.CYAN, 2.0f, false);
                        }
                     }
                 }

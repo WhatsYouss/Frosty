@@ -80,10 +80,10 @@ public class FrozenTreasure extends Module {
             if (ignoreIcebait.isToggled() && isIceBait(stand)) continue;
 
             Color color = getColorForTreasure(stand);
-            RenderUtils.drawBlockOutline(event.getMatrix(), pos, color, 1.5f);
+            RenderUtils.drawBlockOutline(event.getMatrix(), pos, color, 1.5f, false);
             if (pos.equals(lastTargetPos)) {
                 RenderUtils.drawBlockFilled(event.getMatrix(), pos,
-                        new Color(color.getRed(), color.getGreen(), color.getBlue(), 180), 0.2f);
+                        new Color(color.getRed(), color.getGreen(), color.getBlue(), 180), 0.2f, false);
             }
         }
     }

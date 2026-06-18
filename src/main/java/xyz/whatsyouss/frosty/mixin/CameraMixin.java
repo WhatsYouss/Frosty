@@ -14,7 +14,7 @@ public abstract class CameraMixin {
     @ModifyArgs(method = "alignWithEntity", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/Camera;setRotation(FF)V"))
     private void onAlignSetRotationArgs(Args args, float partialTicks) {
         FreeLook freeLook = ModuleManager.freeLook;
-        if (freeLook.isEnabled()) {
+        if (FreeLook.freelooking) {
             args.set(0, freeLook.cameraYaw);
             args.set(1, freeLook.cameraPitch);
         }

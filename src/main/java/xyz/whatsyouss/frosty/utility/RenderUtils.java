@@ -328,108 +328,141 @@ public class RenderUtils {
         }
     }
 
-    public static void drawBoxFilled(PoseStack stack, AABB box, Color c) {
+    public static void drawBoxFilled(PoseStack stack, AABB box, Color c, boolean depthTest) {
+        BufferSource bs = new BufferSource();
+        RenderType layer = RenderLayers.getQuads(depthTest);
+        VertexConsumer buffer = bs.getBuffer(layer);
+
         Vec3 cam = mc.getEntityRenderDispatcher().camera.position();
-        float x0 = (float)(box.minX - cam.x), y0 = (float)(box.minY - cam.y), z0 = (float)(box.minZ - cam.z);
-        float x1 = (float)(box.maxX - cam.x), y1 = (float)(box.maxY - cam.y), z1 = (float)(box.maxZ - cam.z);
+        AABB relative = box.move(-cam.x, -cam.y, -cam.z);
 
-        BufferBuilder buf = new BufferBuilder(BYTE_BUFFER,
-                PrimitiveTopology.TRIANGLES, DefaultVertexFormat.POSITION_COLOR);
-        Matrix4f m = stack.last().pose();
-        int rgb = c.getRGB();
+        int color = c.getRGB() | (c.getAlpha() << 24);
+        drawSolidBoxInternal(stack, buffer, relative, color);
 
-        quadColor(buf, m, rgb, x0,y0,z0, x1,y0,z0, x1,y0,z1, x0,y0,z1);
-        quadColor(buf, m, rgb, x0,y1,z0, x0,y1,z1, x1,y1,z1, x1,y1,z0);
-        quadColor(buf, m, rgb, x0,y0,z0, x0,y1,z0, x1,y1,z0, x1,y0,z0);
-        quadColor(buf, m, rgb, x1,y0,z0, x1,y1,z0, x1,y1,z1, x1,y0,z1);
-        quadColor(buf, m, rgb, x0,y0,z1, x1,y0,z1, x1,y1,z1, x0,y1,z1);
-        quadColor(buf, m, rgb, x0,y0,z0, x0,y0,z1, x0,y1,z1, x0,y1,z0);
-
-        submitWorld(stack, buf.build(), c);
+        bs.uploadAndDraw();
     }
 
-    public static void drawBoxFilled(PoseStack stack, Vec3 vec, Color c) {
-        drawBoxFilled(stack, AABB.unitCubeFromLowerCorner(vec), c);
+    private static void drawSolidBoxInternal(PoseStack matrices, VertexConsumer buffer, AABB box, int color) {
+        PoseStack.Pose entry = matrices.last();
+        float x1 = (float) box.minX, y1 = (float) box.minY, z1 = (float) box.minZ;
+        float x2 = (float) box.maxX, y2 = (float) box.maxY, z2 = (float) box.maxZ;
+
+        buffer.addVertex(entry, x1, y1, z1).setColor(color);
+        buffer.addVertex(entry, x2, y1, z1).setColor(color);
+        buffer.addVertex(entry, x2, y1, z2).setColor(color);
+        buffer.addVertex(entry, x1, y1, z2).setColor(color);
+
+        buffer.addVertex(entry, x1, y2, z1).setColor(color);
+        buffer.addVertex(entry, x1, y2, z2).setColor(color);
+        buffer.addVertex(entry, x2, y2, z2).setColor(color);
+        buffer.addVertex(entry, x2, y2, z1).setColor(color);
+
+        buffer.addVertex(entry, x1, y1, z1).setColor(color);
+        buffer.addVertex(entry, x1, y2, z1).setColor(color);
+        buffer.addVertex(entry, x2, y2, z1).setColor(color);
+        buffer.addVertex(entry, x2, y1, z1).setColor(color);
+
+        buffer.addVertex(entry, x2, y1, z1).setColor(color);
+        buffer.addVertex(entry, x2, y2, z1).setColor(color);
+        buffer.addVertex(entry, x2, y2, z2).setColor(color);
+        buffer.addVertex(entry, x2, y1, z2).setColor(color);
+
+        buffer.addVertex(entry, x1, y1, z2).setColor(color);
+        buffer.addVertex(entry, x2, y1, z2).setColor(color);
+        buffer.addVertex(entry, x2, y2, z2).setColor(color);
+        buffer.addVertex(entry, x1, y2, z2).setColor(color);
+
+        buffer.addVertex(entry, x1, y1, z1).setColor(color);
+        buffer.addVertex(entry, x1, y1, z2).setColor(color);
+        buffer.addVertex(entry, x1, y2, z2).setColor(color);
+        buffer.addVertex(entry, x1, y2, z1).setColor(color);
     }
 
-    public static void drawBoxFilled(PoseStack stack, BlockPos bp, Color c) {
-        drawBoxFilled(stack, new AABB(bp), c);
-    }
+    public static void drawBox(PoseStack stack, AABB box, Color c, float lineWidth, boolean depthTest) {
+        BufferSource bs = new BufferSource();
+        RenderType layer = RenderLayers.getLines(depthTest);
+        VertexConsumer buffer = bs.getBuffer(layer);
 
-    public static void drawBox(PoseStack stack, AABB box, Color c, double lineWidth) {
         Vec3 cam = mc.getEntityRenderDispatcher().camera.position();
+        AABB relative = box.move(-cam.x, -cam.y, -cam.z);
 
-        double tx = cam.x + 5;
-        double ty = cam.y;
-        double tz = cam.z;
-        AABB testBox = new AABB(tx, ty, tz, tx+2, ty+2, tz+2);
+        int color = c.getRGB() | (c.getAlpha() << 24);
+        drawOutlinedBoxInternal(stack, buffer, relative, color, lineWidth);
 
-        BufferBuilder buf = new BufferBuilder(BYTE_BUFFER,
-                PrimitiveTopology.TRIANGLES, DefaultVertexFormat.POSITION_COLOR);
-        Matrix4f m = stack.last().pose();
-
-        edge3D(buf, m, cam, box, lineWidth, c, box.minX,box.minY,box.minZ, box.maxX,box.minY,box.minZ);
-        edge3D(buf, m, cam, box, lineWidth, c, box.maxX,box.minY,box.minZ, box.maxX,box.minY,box.maxZ);
-        edge3D(buf, m, cam, box, lineWidth, c, box.maxX,box.minY,box.maxZ, box.minX,box.minY,box.maxZ);
-        edge3D(buf, m, cam, box, lineWidth, c, box.minX,box.minY,box.maxZ, box.minX,box.minY,box.minZ);
-        edge3D(buf, m, cam, box, lineWidth, c, box.minX,box.minY,box.minZ, box.minX,box.maxY,box.minZ);
-        edge3D(buf, m, cam, box, lineWidth, c, box.maxX,box.minY,box.minZ, box.maxX,box.maxY,box.minZ);
-        edge3D(buf, m, cam, box, lineWidth, c, box.maxX,box.minY,box.maxZ, box.maxX,box.maxY,box.maxZ);
-        edge3D(buf, m, cam, box, lineWidth, c, box.minX,box.minY,box.maxZ, box.minX,box.maxY,box.maxZ);
-        edge3D(buf, m, cam, box, lineWidth, c, box.minX,box.maxY,box.minZ, box.maxX,box.maxY,box.minZ);
-        edge3D(buf, m, cam, box, lineWidth, c, box.maxX,box.maxY,box.minZ, box.maxX,box.maxY,box.maxZ);
-        edge3D(buf, m, cam, box, lineWidth, c, box.maxX,box.maxY,box.maxZ, box.minX,box.maxY,box.maxZ);
-        edge3D(buf, m, cam, box, lineWidth, c, box.minX,box.maxY,box.maxZ, box.minX,box.maxY,box.minZ);
-
-        submitWorld(stack, buf.build(), c);
+        bs.uploadAndDraw();
     }
 
-    public static void drawBox(PoseStack stack, Vec3 vec, Color c, double lineWidth) {
-        drawBox(stack, AABB.unitCubeFromLowerCorner(vec), c, lineWidth);
+    private static void drawOutlinedBoxInternal(PoseStack matrices, VertexConsumer buffer, AABB box, int color, float lineWidth) {
+        PoseStack.Pose entry = matrices.last();
+        float x1 = (float) box.minX, y1 = (float) box.minY, z1 = (float) box.minZ;
+        float x2 = (float) box.maxX, y2 = (float) box.maxY, z2 = (float) box.maxZ;
+
+        // bottom
+        buffer.addVertex(entry, x1, y1, z1).setColor(color).setNormal(entry, 1, 0, 0).setLineWidth(lineWidth);
+        buffer.addVertex(entry, x2, y1, z1).setColor(color).setNormal(entry, 1, 0, 0).setLineWidth(lineWidth);
+        buffer.addVertex(entry, x1, y1, z1).setColor(color).setNormal(entry, 0, 0, 1).setLineWidth(lineWidth);
+        buffer.addVertex(entry, x1, y1, z2).setColor(color).setNormal(entry, 0, 0, 1).setLineWidth(lineWidth);
+        buffer.addVertex(entry, x2, y1, z1).setColor(color).setNormal(entry, 0, 0, 1).setLineWidth(lineWidth);
+        buffer.addVertex(entry, x2, y1, z2).setColor(color).setNormal(entry, 0, 0, 1).setLineWidth(lineWidth);
+        buffer.addVertex(entry, x1, y1, z2).setColor(color).setNormal(entry, 1, 0, 0).setLineWidth(lineWidth);
+        buffer.addVertex(entry, x2, y1, z2).setColor(color).setNormal(entry, 1, 0, 0).setLineWidth(lineWidth);
+
+        // top
+        buffer.addVertex(entry, x1, y2, z1).setColor(color).setNormal(entry, 1, 0, 0).setLineWidth(lineWidth);
+        buffer.addVertex(entry, x2, y2, z1).setColor(color).setNormal(entry, 1, 0, 0).setLineWidth(lineWidth);
+        buffer.addVertex(entry, x1, y2, z1).setColor(color).setNormal(entry, 0, 0, 1).setLineWidth(lineWidth);
+        buffer.addVertex(entry, x1, y2, z2).setColor(color).setNormal(entry, 0, 0, 1).setLineWidth(lineWidth);
+        buffer.addVertex(entry, x2, y2, z1).setColor(color).setNormal(entry, 0, 0, 1).setLineWidth(lineWidth);
+        buffer.addVertex(entry, x2, y2, z2).setColor(color).setNormal(entry, 0, 0, 1).setLineWidth(lineWidth);
+        buffer.addVertex(entry, x1, y2, z2).setColor(color).setNormal(entry, 1, 0, 0).setLineWidth(lineWidth);
+        buffer.addVertex(entry, x2, y2, z2).setColor(color).setNormal(entry, 1, 0, 0).setLineWidth(lineWidth);
+
+        // verticals
+        buffer.addVertex(entry, x1, y1, z1).setColor(color).setNormal(entry, 0, 1, 0).setLineWidth(lineWidth);
+        buffer.addVertex(entry, x1, y2, z1).setColor(color).setNormal(entry, 0, 1, 0).setLineWidth(lineWidth);
+        buffer.addVertex(entry, x2, y1, z1).setColor(color).setNormal(entry, 0, 1, 0).setLineWidth(lineWidth);
+        buffer.addVertex(entry, x2, y2, z1).setColor(color).setNormal(entry, 0, 1, 0).setLineWidth(lineWidth);
+        buffer.addVertex(entry, x1, y1, z2).setColor(color).setNormal(entry, 0, 1, 0).setLineWidth(lineWidth);
+        buffer.addVertex(entry, x1, y2, z2).setColor(color).setNormal(entry, 0, 1, 0).setLineWidth(lineWidth);
+        buffer.addVertex(entry, x2, y1, z2).setColor(color).setNormal(entry, 0, 1, 0).setLineWidth(lineWidth);
+        buffer.addVertex(entry, x2, y2, z2).setColor(color).setNormal(entry, 0, 1, 0).setLineWidth(lineWidth);
     }
 
-    public static void drawBox(PoseStack stack, BlockPos bp, Color c, double lineWidth) {
-        drawBox(stack, new AABB(bp), c, lineWidth);
+    public static void drawBox(PoseStack stack, Vec3 vec, Color c, float lineWidth, boolean depthTest) {
+        drawBox(stack, AABB.unitCubeFromLowerCorner(vec), c, lineWidth, depthTest);
+    }
+
+    public static void drawBox(PoseStack stack, BlockPos bp, Color c, float lineWidth, boolean depthTest) {
+        drawBox(stack, new AABB(bp), c, lineWidth, depthTest);
     }
 
     public static void outlineEntity(PoseStack matrices, Entity entity,
-                                     Color color, float lineWidth, float partialTicks) {
+                                     Color color, float lineWidth, float partialTicks, boolean depthTest) {
         AABB box = entity.getBoundingBox();
         double ox = Mth.lerp(partialTicks, entity.xOld, entity.getX()) - entity.getX();
         double oy = Mth.lerp(partialTicks, entity.yOld, entity.getY()) - entity.getY();
         double oz = Mth.lerp(partialTicks, entity.zOld, entity.getZ()) - entity.getZ();
-        drawBox(matrices, box.move(ox, oy, oz), color, lineWidth);
+        drawBox(matrices, box.move(ox, oy, oz), color, lineWidth, depthTest);
     }
 
     public static void outlineEntity(PoseStack matrices, Entity entity,
-                                     Color color, float lineWidth) {
-        outlineEntity(matrices, entity, color, lineWidth, 1.0f);
+                                     Color color, float lineWidth, boolean depthTest) {
+        outlineEntity(matrices, entity, color, lineWidth, 1.0f, depthTest);
     }
 
-    public static void drawBlockFilled(PoseStack stack, BlockPos pos, Color color, float alpha) {
+    public static void drawBlockFilled(PoseStack stack, BlockPos pos, Color color, float alpha, boolean depthTest) {
         Color c = new Color(color.getRed(), color.getGreen(), color.getBlue(), (int)(alpha * 255));
-        drawBoxFilled(stack, new AABB(pos), c);
+        drawBoxFilled(stack, new AABB(pos), c, depthTest);
     }
 
-    public static void drawBlockOutline(PoseStack stack, BlockPos pos, Color color, float lineWidth) {
-        drawBox(stack, new AABB(pos), color, lineWidth);
+    public static void drawBlockOutline(PoseStack stack, BlockPos pos, Color color, float lineWidth, boolean depthTest) {
+        drawBox(stack, new AABB(pos), color, lineWidth, depthTest);
     }
 
     public static void drawFullBlock(PoseStack stack, BlockPos pos,
-                                     Color color, float lineWidth, float fillAlpha) {
-        drawBlockFilled(stack, pos, color, fillAlpha);
-        drawBlockOutline(stack, pos, color, lineWidth);
-    }
-
-    public static void drawLine3D(PoseStack stack,
-                                  Vec3 from, Vec3 to,
-                                  Color color, float thickness) {
-        Vec3 cam = mc.getEntityRenderDispatcher().camera.position();
-        BufferBuilder buf = new BufferBuilder(BYTE_BUFFER,
-                PrimitiveTopology.TRIANGLES, DefaultVertexFormat.POSITION_COLOR);
-        Matrix4f m = stack.last().pose();
-        edgeRaw(buf, m, cam, from.x, from.y, from.z, to.x, to.y, to.z, thickness, color);
-        submitWorld(stack, buf.build(), color);
+                                     Color color, float lineWidth, float fillAlpha, boolean depthTest) {
+        drawBlockFilled(stack, pos, color, fillAlpha, depthTest);
+        drawBlockOutline(stack, pos, color, lineWidth, depthTest);
     }
 
     private static void quadColor(BufferBuilder buf, Matrix4f m, int rgb,
@@ -490,52 +523,6 @@ public class RenderUtils {
         return cross.scale(1.0 / len);
     }
 
-    private static void submitWorld(PoseStack stack, MeshData mesh, Color color) {
-        if (mesh == null) return;
-        ensureWhiteTexture();
-
-        ByteBuffer vertData = mesh.vertexBuffer();
-        int size = vertData.remaining();
-
-        GpuBuffer gpuBuf = RenderSystem.getDevice().createBuffer(
-                () -> "frosty_esp_world",
-                GpuBuffer.USAGE_VERTEX | GpuBuffer.USAGE_COPY_DST,
-                size
-        );
-
-        CommandEncoder encoder = RenderSystem.getDevice().createCommandEncoder();
-        uploadToGpuBuffer(encoder, gpuBuf, vertData, size);
-
-        int indexCount = mesh.drawState().indexCount();
-        RenderSystem.AutoStorageIndexBuffer seqBuf =
-                RenderSystem.getSequentialBuffer(PrimitiveTopology.TRIANGLES);
-        GpuBuffer idxBuffer = seqBuf.getBuffer(indexCount);
-        IndexType idxType = seqBuf.type();
-
-        var target = mc.gameRenderer.mainRenderTarget();
-
-        try (RenderPass renderPass = encoder.createRenderPass(
-                () -> "frosty_esp_render_pass",
-                target.getColorTextureView(),
-                Optional.empty(),
-                target.getDepthTextureView(),
-                OptionalDouble.empty()
-        )) {
-            RenderSystem.bindDefaultUniforms(renderPass);
-            renderPass.disableScissor();
-            renderPass.setPipeline(RenderPipelines.DEBUG_QUADS);
-            renderPass.setVertexBuffer(0, gpuBuf.slice());
-            renderPass.setIndexBuffer(idxBuffer, idxType);
-            if (whiteTextureView != null && whiteSampler != null) {
-                renderPass.bindTexture("Sampler0", whiteTextureView, whiteSampler);
-            }
-            renderPass.drawIndexed(indexCount, 1, 0, 0, 0);
-        }
-
-        gpuBuf.close();
-        mesh.close();
-    }
-
     public static void free() {
         BYTE_BUFFER.close();
         if (whiteTextureView != null) { whiteTextureView.close(); whiteTextureView = null; }
@@ -561,97 +548,46 @@ public class RenderUtils {
         float relY = (float) (y - cam.y);
         float relZ = (float) (z - cam.z);
 
-        Quaternionf camRot = mc.getEntityRenderDispatcher().camera.rotation();
+        matrix.pushPose();
+        matrix.translate(relX, relY, relZ);
 
-        float scale;
-        if (scaleWithDistance) {
-            scale = 0.025f;
-        } else {
-            double distance = cam.distanceTo(new Vec3(x, y, z));
-            scale = (float) (DISTANCE_SCALE_FACTOR * distance);
-        }
+        Vector3f toCam = new Vector3f(-relX, -relY, -relZ);
+        if (toCam.lengthSquared() < 1e-6f) toCam.set(0, 0, 1);
+        toCam.normalize();
 
-        PoseStack textStack = new PoseStack();
-        textStack.translate(relX, relY, relZ);
-        textStack.mulPose(camRot);
-        textStack.scale(scale, -scale, scale);
+        float yaw = mc.getEntityRenderDispatcher().camera.yRot();
+        float wrappedYaw = (yaw % 360 + 360) % 360;
+
+        boolean isNorthSouth = (wrappedYaw >= 135 && wrappedYaw <= 225) || (wrappedYaw <= 45 || wrappedYaw >= 315);
+        Vector3f toCamByYaw = isNorthSouth ? toCam.negate() : toCam;
+
+        Quaternionf billboardQuat = new Quaternionf().lookAlong(toCamByYaw, new Vector3f(0, 1, 0));
+
+        matrix.mulPose(billboardQuat);
+
+        float scale = scaleWithDistance ? 0.025f : (float)(DISTANCE_SCALE_FACTOR * cam.distanceTo(new Vec3(x, y, z)));
+        matrix.scale(scale, -scale, scale);
 
         int packedColor = color.getRGB() | (color.getAlpha() << 24);
         Font font = mc.font;
         int textWidth = font.width(text);
-
         Font.PreparedText prepared = font.prepareText(text, -textWidth / 2f, 0f, packedColor, false, 0);
 
-        Matrix4f glyphMatrix = textStack.last().pose();
+        Matrix4f glyphMatrix = matrix.last().pose();
 
-        Map<GpuTextureView, BufferBuilder> buffers = new HashMap<>();
-        Map<GpuTextureView, RenderType> typeForTexture = new HashMap<>();
-        List<ByteBufferBuilder> ownedByteBuffers = new ArrayList<>();
+        BufferSource bs = new BufferSource();
+        Font.DisplayMode displayMode = Font.DisplayMode.SEE_THROUGH;
 
         prepared.visit(new Font.GlyphVisitor() {
             @Override
             public void acceptRenderable(TextRenderable renderable) {
-                RenderType type = renderable.renderType(Font.DisplayMode.NORMAL);
-                GpuTextureView tex = renderable.textureView();
-                BufferBuilder buf = buffers.computeIfAbsent(tex, t -> {
-                    ByteBufferBuilder bb = new ByteBufferBuilder(1536);
-                    ownedByteBuffers.add(bb);
-                    return new BufferBuilder(bb, type.primitiveTopology(), type.format());
-                });
-                typeForTexture.putIfAbsent(tex, type);
-                renderable.render(glyphMatrix, buf, 0, true);
+                VertexConsumer builder = bs.getBuffer(renderable.renderType(displayMode));
+                renderable.render(glyphMatrix, builder, 15728880, false);
             }
         });
 
+        bs.uploadAndDraw();
 
-        for (Map.Entry<GpuTextureView, BufferBuilder> entry : buffers.entrySet()) {
-            GpuTextureView tex = entry.getKey();
-            MeshData mesh = entry.getValue().build();
-            if (mesh == null) continue;
-
-            RenderType type = typeForTexture.get(tex);
-            submitTextMesh(mesh, type.pipeline(), tex, type.primitiveTopology());
-        }
-    }
-
-    private static void submitTextMesh(MeshData mesh, RenderPipeline pipeline, GpuTextureView textureView, PrimitiveTopology topology) {
-        ensureWhiteTexture();
-
-        ByteBuffer vertData = mesh.vertexBuffer();
-        int size = vertData.remaining();
-
-        GpuBuffer gpuBuf = RenderSystem.getDevice().createBuffer(
-                () -> "frosty_text3d",
-                GpuBuffer.USAGE_VERTEX | GpuBuffer.USAGE_COPY_DST,
-                size);
-
-        CommandEncoder encoder = RenderSystem.getDevice().createCommandEncoder();
-        uploadToGpuBuffer(encoder, gpuBuf, vertData, size);
-
-        int indexCount = mesh.drawState().indexCount();
-        RenderSystem.AutoStorageIndexBuffer seqBuf = RenderSystem.getSequentialBuffer(topology);
-        GpuBuffer idxBuffer = seqBuf.getBuffer(indexCount);
-        IndexType idxType = seqBuf.type();
-
-        var target = mc.gameRenderer.mainRenderTarget();
-
-        try (RenderPass pass = encoder.createRenderPass(
-                () -> "frosty_text3d_pass",
-                target.getColorTextureView(),
-                Optional.empty(),
-                target.getDepthTextureView(),
-                OptionalDouble.empty()
-        )) {
-            RenderSystem.bindDefaultUniforms(pass);
-            pass.setPipeline(pipeline);
-            pass.setVertexBuffer(0, gpuBuf.slice());
-            pass.setIndexBuffer(idxBuffer, idxType);
-            pass.bindTexture("Sampler0", textureView, whiteSampler);
-            pass.disableScissor();
-            pass.drawIndexed(indexCount, 1, 0, 0, 0);
-        }
-
-        gpuBuf.close();
-        mesh.close();
+        matrix.popPose();
     }
 }

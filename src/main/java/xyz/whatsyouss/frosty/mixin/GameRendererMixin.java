@@ -52,38 +52,12 @@ public abstract class GameRendererMixin {
         return original;
     }
 
-    @ModifyVariable(method = "bobHurt", at = @At(value = "STORE"), argsOnly = false)
-    private float modifyTiltStrength(float originalAmount) {
+    @ModifyVariable(method = "bobHurt", at = @At(value = "STORE"), name = "tiltAmount")
+    private float modifyFinalTiltAmount(float originalAmount) {
         if (ModuleManager.noHurtCam.isEnabled()) {
-            return originalAmount * (float) ModuleManager.noHurtCam.multiplier.getInput();
+            return (float) (originalAmount * (ModuleManager.noHurtCam.multiplier.getInput() / 14.0F));
         }
         return originalAmount;
-    }
-
-    @Inject(method = "renderLevel", at = @At(value = "INVOKE", target = "Lnet/minecraft/util/profiling/ProfilerFiller;popPush(Ljava/lang/String;)V", args = "ldc=hand"))
-    private void onAfterHandRender(DeltaTracker deltaTracker, CallbackInfo ci) {
-        if (!Utils.nullCheck()) return;
-
-        Profiler.get().push(Frosty.MOD_ID + "_render3d_tail");
-
-        CameraRenderState cameraState = this.gameRenderState.levelRenderState.cameraRenderState;
-
-        Matrix4f cleanProjection = new Matrix4f(cameraState.projectionMatrix);
-        RenderSystem.setProjectionMatrix(this.levelProjectionMatrixBuffer.getBuffer(cleanProjection), ProjectionType.PERSPECTIVE
-        );
-
-        PoseStack renderStack = new PoseStack();
-
-        Render3DEvent event = new Render3DEvent(
-                renderStack,
-                deltaTracker.getGameTimeDeltaPartialTick(false),
-                cameraState.pos.x(),
-                cameraState.pos.y(),
-                cameraState.pos.z()
-        );
-        Frosty.EVENT_BUS.post(event);
-
-        Profiler.get().pop();
     }
 
     @Inject(method = "renderLevel", at = @At("TAIL"))

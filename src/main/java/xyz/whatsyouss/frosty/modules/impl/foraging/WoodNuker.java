@@ -118,7 +118,7 @@ public class WoodNuker extends Module {
             return;
         }
         if (currentTarget != null) {
-            RenderUtils.drawBox(event.getMatrix(), currentTarget, Color.CYAN, 2f);
+            RenderUtils.drawBox(event.getMatrix(), currentTarget, Color.CYAN, 2f, false);
         }
     }
 

@@ -157,6 +157,6 @@ public class Hideonleaf extends Module {
     }
 
     private void renderShulkerESP(PoseStack matrices, Shulker shulker) {
-        RenderUtils.outlineEntity(matrices, shulker, Color.GREEN, 1.0f);
+        RenderUtils.outlineEntity(matrices, shulker, Color.GREEN, 1.0f, false);
     }
 }

@@ -39,6 +39,6 @@ public class AxolotlESP extends Module {
         if (!axolotl.getVariant().equals(Axolotl.Variant.LUCY)) {
             return;
         }
-        RenderUtils.outlineEntity(matrices, axolotl, Color.PINK, 1.0f);
+        RenderUtils.outlineEntity(matrices, axolotl, Color.PINK, 1.0f, false);
     }
 }
