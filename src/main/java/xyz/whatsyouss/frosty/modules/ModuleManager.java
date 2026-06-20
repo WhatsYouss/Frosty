@@ -96,6 +96,7 @@ public class ModuleManager {
     public static Derp derp;
     public static ChatCopier chatCopier;
     public static Eagle eagle;
+    public static Blink blink;
 
     public void register() {
         this.addModule(tps = new TPS());
@@ -162,6 +163,7 @@ public class ModuleManager {
         this.addModule(derp = new Derp());
         this.addModule(chatCopier = new ChatCopier());
         this.addModule(eagle = new Eagle());
+        this.addModule(blink = new Blink());
         modules.sort(Comparator.comparing(Module::getName));
     }
 

@@ -106,7 +106,7 @@ public class AutoExperiment extends Module {
         tickCounter++;
         AbstractContainerMenu menu = screen.getMenu();
 
-        chronoCurrentCycle = getChronoCycle((Container) menu);
+        chronoCurrentCycle = getChronoCycle(menu);
         Item currentModeItem = menu.getSlot(49).getItem().getItem();
 
         if ((chronoCurrentCycle > 0 && currentModeItem == Items.GLOWSTONE) ||
@@ -114,14 +114,14 @@ public class AutoExperiment extends Module {
             chronoStartSeconds = -1;
             if (!chronoGlintFound) {
                 for (int i = 10; i < 43; i++) {
-                    if (menu.getSlot(i).getItem().isEnchanted()) {
+                    if (menu.getSlot(i).getItem().hasFoil()) {
                         chronoGlintFound = true;
                         chronoGlintFoundAt = i;
                         chronoClickStack.add(TERRACOTTA_TO_GLASS.get(menu.getSlot(i).getItem().getItem()));
                         break;
                     }
                 }
-            } else if (!menu.getSlot(chronoGlintFoundAt).getItem().isEnchanted()) {
+            } else if (!menu.getSlot(chronoGlintFoundAt).getItem().hasFoil()) {
                 chronoGlintFound = false;
                 chronoGlintFoundAt = -1;
             }
@@ -227,8 +227,8 @@ public class AutoExperiment extends Module {
         }
     }
 
-    private int getChronoCycle(Container inventory) {
-        return inventory.getItem(4).getCount();
+    private int getChronoCycle(AbstractContainerMenu menu) {
+        return menu.getSlot(4).getItem().getCount();
     }
 
     private void resetAllSolvers() {

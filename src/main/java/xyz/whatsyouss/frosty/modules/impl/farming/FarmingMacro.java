@@ -45,6 +45,7 @@ public class FarmingMacro extends Module {
     private int warpCooldown = 0;
     private int warpTimeout = 0;
 
+    private boolean awaitingGrab = false;
     private boolean pestPaused = false;
     private int pestResumePt = 1;
 
@@ -130,7 +131,7 @@ public class FarmingMacro extends Module {
         warpTimeout = 0;
         preWarpPos = null;
         activeKey = null;
-        running = true;
+        awaitingGrab = true;
 
         releaseAll();
 
@@ -138,8 +139,6 @@ public class FarmingMacro extends Module {
             pauseForPestClean();
             return;
         }
-
-        beginTurning();
     }
 
     public void stopMacro() {
@@ -155,8 +154,27 @@ public class FarmingMacro extends Module {
 
     @EventHandler
     public void onPreUpdate(PreUpdateEvent event) {
-        if (!Utils.nullCheck() || !running) return;
+        if (!Utils.nullCheck()) return;
 
+        if (awaitingGrab) {
+            if (mc.mouseHandler.isMouseGrabbed()) {
+                awaitingGrab = false;
+                running = true;
+                beginTurning();
+            }
+            return;
+        }
+        if (!running) {
+            return;
+        }
+        if (!mc.mouseHandler.isMouseGrabbed()) {
+            if (mc.gui.screen() == null) {
+                mc.mouseHandler.grabMouse();
+                setKeyPressed(mc.options.keyAttack, true);
+            } else {
+                setKeyPressed(mc.options.keyAttack, false);
+            }
+        }
         if (pestPaused) {
             releaseAll();
             return;
@@ -183,7 +201,9 @@ public class FarmingMacro extends Module {
             return;
         }
 
-        mc.startAttack();
+        if (!mc.options.keyAttack.isDown()) {
+            setKeyPressed(mc.options.keyAttack, true);
+        }
 
         int slot = findHoeSlot();
         if (slot != -1) {

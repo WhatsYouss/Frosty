@@ -8,24 +8,21 @@ import net.minecraft.client.multiplayer.chat.GuiMessageTag;
 import net.minecraft.network.chat.MessageSignature;
 import net.minecraft.network.chat.Component;
 import net.minecraft.util.Mth;
-import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import net.minecraft.client.gui.components.ChatComponent;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.Constant;
 import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.ModifyConstant;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import xyz.whatsyouss.frosty.Frosty;
 import xyz.whatsyouss.frosty.events.impl.ReceiveMessageEvent;
-import xyz.whatsyouss.frosty.utility.ChatComponentAccessor;
+import xyz.whatsyouss.frosty.interfaces.IChatComponent;
 
 import java.util.List;
 
 @Mixin(ChatComponent.class)
-public abstract class ChatComponentMixin implements ChatComponentAccessor {
+public abstract class IChatComponentMixin implements IChatComponent {
     @Unique
     private int nextId;
 

@@ -12,6 +12,7 @@ import net.minecraft.util.Mth;
 import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.level.ClipContext;
 import xyz.whatsyouss.frosty.events.impl.PreUpdateEvent;
+import xyz.whatsyouss.frosty.interfaces.IKeyMapping;
 import xyz.whatsyouss.frosty.modules.Module;
 import xyz.whatsyouss.frosty.modules.ModuleManager;
 import xyz.whatsyouss.frosty.settings.impl.ButtonSetting;
@@ -33,7 +34,7 @@ public class MithrilMacro extends Module {
 
     public SelectSetting prioritize;
     public SliderSetting rotateSmoothing, maxBreaktime;
-    public ButtonSetting titanium, smartRotation;
+    public ButtonSetting titanium, smartRotation, aimCheck;
 
     private int toolSlot = -1;
 
@@ -46,11 +47,13 @@ public class MithrilMacro extends Module {
 
     public MithrilMacro() {
         super("MithrilMacro", category.Mining);
-        this.registerSetting(prioritize      = new SelectSetting("Prioritize", 0, mithrilTypes));
+
+        this.registerSetting(prioritize = new SelectSetting("Prioritize", 0, mithrilTypes));
         this.registerSetting(rotateSmoothing = new SliderSetting("Rotate smoothing", 0, 0, 5, 1));
-        this.registerSetting(smartRotation   = new ButtonSetting("Smart Rotation", true));
-        this.registerSetting(maxBreaktime    = new SliderSetting("Max Breaktime", "s", 1, 0.5, 7, 0.1));
-        this.registerSetting(titanium        = new ButtonSetting("Titanium", true));
+        this.registerSetting(smartRotation = new ButtonSetting("Smart Rotation", true));
+        this.registerSetting(maxBreaktime = new SliderSetting("Max Breaktime", "s", 1, 0.5, 7, 0.1));
+        this.registerSetting(titanium = new ButtonSetting("Titanium", true));
+        this.registerSetting(aimCheck = new ButtonSetting("Aim check", true));
     }
 
     @Override
@@ -77,7 +80,12 @@ public class MithrilMacro extends Module {
     }
 
     @Override
-    public void onDisable() { resetTarget(); }
+    public void onDisable() {
+        resetTarget();
+        if (mc.options.keyAttack.isDown()) {
+            IKeyMapping.get(mc.options.keyAttack).setDown(false);
+        }
+    }
 
     @EventHandler
     public void onPreUpdate(PreUpdateEvent event) {
@@ -87,6 +95,16 @@ public class MithrilMacro extends Module {
 
         if (mc.player.getInventory().getSelectedSlot() != toolSlot && toolSlot != -1)
             mc.player.getInventory().setSelectedSlot(toolSlot);
+
+        if (!mc.mouseHandler.isMouseGrabbed() && !aimCheck.isEnabled) {
+            if (mc.gui.screen() == null) {
+                mc.mouseHandler.grabMouse();
+                IKeyMapping.get(mc.options.keyAttack).setDown(true);
+            }
+        }
+        if (!mc.options.keyAttack.isDown() && !aimCheck.isEnabled) {
+            IKeyMapping.get(mc.options.keyAttack).setDown(true);
+        }
 
         if (targetPos != null && mc.level.getBlockState(targetPos).is(Blocks.BEDROCK))
             resetTarget();
