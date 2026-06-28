@@ -21,7 +21,7 @@ public class AutoReel extends Module {
     private int tickCD;
 
     public AutoReel() {
-        super("AutoReel", category.Hunting);
+        super("AutoReel", "自动收线", category.Hunting);
     }
 
     @EventHandler

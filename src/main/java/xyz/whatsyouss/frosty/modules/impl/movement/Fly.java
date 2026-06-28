@@ -13,7 +13,7 @@ public class Fly extends Module {
     private final SliderSetting vs;
 
     public Fly() {
-        super("Fly", category.Movement);
+        super("Fly", "飞行", category.Movement);
 
         this.registerSetting(hs = new SliderSetting("Horizontal speed", 1, 0.1, 15, 0.1));
         this.registerSetting(vs = new SliderSetting("Vertical speed", 1, 0.1, 15, 0.1));

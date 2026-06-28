@@ -45,7 +45,7 @@ public class SandNuker extends Module {
     private int requiredTicks = 0;
 
     public SandNuker() {
-        super("SandNuker", category.Mining);
+        super("SandNuker", "沙子光环", category.Mining);
 
         this.registerSetting(mode = new SelectSetting("Mode", 1, modes));
         this.registerSetting(bps = new SliderSetting("BPS", 20 ,10, 20, 1));
@@ -62,9 +62,9 @@ public class SandNuker extends Module {
             return;
         }
 
-        if (mode.getValue() == 0) { // Normal
+        if (mode.getValue() == 0) {
             handleNormalMode();
-        } else { // Instant
+        } else {
             handleInstantMode();
         }
     }

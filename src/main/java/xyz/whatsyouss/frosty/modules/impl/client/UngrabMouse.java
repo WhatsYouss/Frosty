@@ -6,7 +6,7 @@ import xyz.whatsyouss.frosty.modules.Module;
 public class UngrabMouse extends Module {
 
     public UngrabMouse() {
-        super("UngrabMouse", category.Client);
+        super("UngrabMouse", "释放鼠标", category.Client);
     }
 
     @Override

@@ -8,7 +8,7 @@ public class AntiDebuff extends Module {
     public ButtonSetting nausea;
 
     public AntiDebuff() {
-        super("AntiDebuff", category.Render);
+        super("AntiDebuff", "防负面效果", category.Render);
 
         this.registerSetting(nausea = new ButtonSetting("Nausea", true));
     }

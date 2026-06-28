@@ -34,7 +34,7 @@ public class Blink extends Module {
     private Vec3 serverPos = null;
 
     public Blink() {
-        super("Blink", category.Other);
+        super("Blink", "瞬移", category.Other);
 
         this.registerSetting(maxTime = new SliderSetting("Max time", "s", 0.7, 0.1, 20, 0.1));
         this.registerSetting(releaseTimer = new SliderSetting("Release timer", "s", 0.01, 0, 0.25, 0.01));

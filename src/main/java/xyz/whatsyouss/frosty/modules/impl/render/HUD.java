@@ -34,7 +34,7 @@ public class HUD extends Module {
     private float SCALE;
 
     public HUD() {
-        super("HUD", Module.category.Render);
+        super("HUD", "界面", Module.category.Render);
 
         this.registerSetting(offset = new SliderSetting("Offset", 2, 0, 5, 1));
         this.registerSetting(color = new SelectSetting("Color", 0, colors));

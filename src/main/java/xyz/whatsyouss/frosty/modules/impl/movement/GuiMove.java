@@ -30,7 +30,7 @@ public class GuiMove extends Module {
     private String[] modes = new String[] {"Vanilla", "Motion", "Legit"};
 
     public GuiMove() {
-        super("GuiMove", category.Movement);
+        super("GuiMove", "背包行走", category.Movement);
         this.registerSetting(mode = new SelectSetting("Mode", 2, modes));
     }
 

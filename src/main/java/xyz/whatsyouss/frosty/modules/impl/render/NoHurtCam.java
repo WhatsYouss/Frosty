@@ -8,7 +8,7 @@ public class NoHurtCam extends Module {
     public SliderSetting multiplier;
 
     public NoHurtCam() {
-        super("NoHurtCam", category.Render);
+        super("NoHurtCam", "无受伤抖动", category.Render);
 
         this.registerSetting(multiplier = new SliderSetting("Multiplier", "x", 0, 0, 14, 1));
     }

@@ -111,7 +111,7 @@ public class PestCleaner extends Module {
     private int descentPulseTick = 0;
 
     public PestCleaner() {
-        super("PestCleaner", category.Farming);
+        super("PestCleaner", "害虫清理", category.Farming);
     }
 
     private static double xzDist(Vec3 a, Vec3 b) {

@@ -4,7 +4,7 @@ import xyz.whatsyouss.frosty.modules.Module;
 
 public class Commands extends Module {
     public Commands() {
-        super("Commands", category.Client);
+        super("Commands", "指令", category.Client);
     }
 
     @Override

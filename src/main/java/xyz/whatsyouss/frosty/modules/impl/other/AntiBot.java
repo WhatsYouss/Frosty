@@ -14,7 +14,7 @@ public class AntiBot extends Module {
     private static final Map<UUID, Long> joinTimes = new HashMap<>();
 
     public AntiBot() {
-        super("AntiBot", category.Other);
+        super("AntiBot", "防假人", category.Other);
     }
 
     @EventHandler

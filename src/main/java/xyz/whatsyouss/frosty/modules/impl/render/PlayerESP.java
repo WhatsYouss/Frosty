@@ -22,7 +22,7 @@ public class PlayerESP extends Module {
     private static double RANGE;
 
     public PlayerESP() {
-        super("PlayerESP", category.Render);
+        super("PlayerESP", "玩家透视", category.Render);
 
         this.registerSetting(expand = new ButtonSetting("Expand", true));
         this.registerSetting(fill = new ButtonSetting("Fill", false));

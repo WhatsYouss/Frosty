@@ -12,7 +12,7 @@ public class Fullbright extends Module {
     public int selectedMode;
 
     public Fullbright() {
-        super("Fullbright", category.Render);
+        super("Fullbright", "夜视", category.Render);
 
         this.registerSetting(mode = new SelectSetting("Mode", 0, modes));
     }

@@ -8,7 +8,7 @@ public class NoHudElement extends Module {
     public ButtonSetting scoreboard, bossBar, title;
 
     public NoHudElement() {
-        super("NoHudElement", category.Render);
+        super("NoHudElement", "无界面元素", category.Render);
 
         this.registerSetting(scoreboard = new ButtonSetting("Scoreboard", true));
         this.registerSetting(bossBar = new ButtonSetting("Boss bar", true));

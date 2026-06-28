@@ -13,7 +13,7 @@ public class Eagle extends Module {
     private boolean onEdge;
 
     public Eagle() {
-        super("Eagle", category.Movement);
+        super("Eagle", "自动下蹲", category.Movement);
     }
 
     @Override

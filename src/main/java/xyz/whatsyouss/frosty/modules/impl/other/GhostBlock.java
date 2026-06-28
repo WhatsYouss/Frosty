@@ -25,7 +25,7 @@ public class GhostBlock extends Module {
     private boolean rcing;
 
     public GhostBlock() {
-        super("GhostBlock", category.Other);
+        super("GhostBlock", "幽灵方块", category.Other);
 
         this.registerSetting(range = new SliderSetting("Range", 8, 5, 15, 1));
     }

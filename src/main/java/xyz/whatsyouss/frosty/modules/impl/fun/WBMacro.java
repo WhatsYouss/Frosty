@@ -30,7 +30,7 @@ public class WBMacro extends Module {
     private List<String> messageQueue = new ArrayList<>();
 
     public WBMacro() {
-        super("WBMacro", category.Fun);
+        super("WBMacro", "欢迎宏", category.Fun);
         this.registerSetting(delay = new SliderSetting("Delay", "ms", 500, 500, 2000, 500));
     }
 

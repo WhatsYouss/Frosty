@@ -52,7 +52,7 @@ public class DojoHelper extends Module {
     private long controlLookCooldown = 0L;
 
     public DojoHelper() {
-        super("DojoHelper", category.Other);
+        super("DojoHelper", "道场助手", category.Other);
     }
 
     @Override

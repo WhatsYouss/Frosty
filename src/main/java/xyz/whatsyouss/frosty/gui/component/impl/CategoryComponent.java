@@ -4,6 +4,7 @@ import net.minecraft.client.gui.GuiGraphicsExtractor;
 import xyz.whatsyouss.frosty.gui.component.Component;
 import xyz.whatsyouss.frosty.modules.Module;
 import xyz.whatsyouss.frosty.modules.ModuleManager;
+import xyz.whatsyouss.frosty.modules.impl.client.UI;
 
 import java.awt.*;
 
@@ -17,6 +18,25 @@ public class CategoryComponent extends Component {
         super(x, y, width, height);
         this.category = category;
         this.selected = selected;
+    }
+
+    private String getChineseName(Module.category cat) {
+        if (cat == null) return "";
+
+        switch (cat) {
+            case Combat:   return "战斗";
+            case Movement: return "移动";
+            case Render:   return "渲染";
+            case Other:    return "其他";
+            case Client:   return "客户端";
+            case Fishing:   return "钓鱼";
+            case Foraging:   return "伐木";
+            case Hunting:   return "狩猎";
+            case Mining:   return "挖矿";
+            case Farming:   return "农业";
+            case Fun:   return "娱乐";
+            default:       return cat.name();
+        }
     }
 
     @Override
@@ -34,7 +54,10 @@ public class CategoryComponent extends Component {
         }
 
         context.fill((int) x, (int) y, (int) (x + width), (int) (y + height), color);
-        context.text(mc.font, net.minecraft.network.chat.Component.literal(category.name()), (int) (x + width / 2 - (float) mc.font.width(category.name()) / 2),
+        String displayName = UI.lang.getValue() == 1 ? getChineseName(category) : category.name();
+
+        context.text(mc.font, net.minecraft.network.chat.Component.literal(displayName),
+                (int) (x + width / 2 - (float) mc.font.width(displayName) / 2),
                 (int) (y + height / 2 - 4), isLight ? Color.BLACK.getRGB() : Color.WHITE.getRGB(), false);
     }
 

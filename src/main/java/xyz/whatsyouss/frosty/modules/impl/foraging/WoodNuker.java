@@ -39,7 +39,7 @@ public class WoodNuker extends Module {
     private boolean startPacketSent = false;
 
     public WoodNuker() {
-        super("WoodNuker", category.Foraging);
+        super("WoodNuker", "木头光环",category.Foraging);
 
         this.registerSetting(type = new SelectSetting("Type", 0, types));
         this.registerSetting(aim = new ButtonSetting("Aim", false));

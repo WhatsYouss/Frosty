@@ -32,7 +32,7 @@ public class AutoFish extends Module {
     private boolean failed = false;
 
     public AutoFish() {
-        super("AutoFish", category.Fishing);
+        super("AutoFish", "自动钓鱼", category.Fishing);
 
         this.registerSetting(autoThrow = new ButtonSetting("Auto Throw", true));
         this.registerSetting(antiAFK = new ButtonSetting("Anti AFK", true));

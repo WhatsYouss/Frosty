@@ -22,7 +22,7 @@ public class Derp extends Module {
     private float accumulatedDegrees = 0.0f;
 
     public Derp() {
-        super("Derp", category.Fun);
+        super("Derp", "自身旋转", category.Fun);
 
         this.registerSetting(speed = new SliderSetting("Speed", 3, 1, 7, 1));
         this.registerSetting(direction = new SelectSetting("Direction", 2, dir));

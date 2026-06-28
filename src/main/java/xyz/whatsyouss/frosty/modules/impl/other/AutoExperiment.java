@@ -70,7 +70,7 @@ public class AutoExperiment extends Module {
     private int tickCounter = 0;
 
     public AutoExperiment() {
-        super("AutoExperiment", category.Other);
+        super("AutoExperiment", "自动附魔桌", category.Other);
         this.registerSetting(delay = new SliderSetting("Delay", 4, 2, 8, 1));
     }
 
@@ -178,7 +178,6 @@ public class AutoExperiment extends Module {
             ultraStartSeconds = -1;
             for (int i = 0; i < 45; i++) {
                 ItemStack stack = menu.getSlot(i).getItem();
-                // pane 判断：用 item registry name 包含 pane
                 if (!BuiltInRegistries.ITEM.getKey(stack.getItem()).getPath().contains("pane")) {
                     if (stack.getCount() == (ultraClickStack.size() + 1)) {
                         ultraClickStack.add(i);
@@ -192,7 +191,7 @@ public class AutoExperiment extends Module {
 
             if (tickCounter % delay.getInput() == 0 &&
                     menu.getSlot(49).getItem().getCount() < ultraStartSeconds) {
-                inputUltrasequencerSequence(screen);  // 只传screen，inventory从menu取
+                inputUltrasequencerSequence(screen);
             }
         }
     }

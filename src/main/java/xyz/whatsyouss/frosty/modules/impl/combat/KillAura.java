@@ -32,7 +32,7 @@ public class KillAura extends Module {
     private Entity currentTarget = null;
 
     public KillAura() {
-        super("KillAura", category.Combat);
+        super("KillAura", "杀戮光环", category.Combat);
 
         this.registerSetting(aps = new SliderSetting("APS", 14, 1, 20, 1));
         this.registerSetting(swingRange = new SliderSetting("Swing range", 4.5, 3, 7, 0.1));

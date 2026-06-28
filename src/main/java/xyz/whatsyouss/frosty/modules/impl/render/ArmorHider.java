@@ -8,7 +8,7 @@ public class ArmorHider extends Module {
     public ButtonSetting head, selfOnly;
 
     public ArmorHider() {
-        super("ArmorHider", category.Render);
+        super("ArmorHider", "装备隐形", category.Render);
 
         this.registerSetting(head = new ButtonSetting("Head", true));
         this.registerSetting(selfOnly = new ButtonSetting("Self only", true));

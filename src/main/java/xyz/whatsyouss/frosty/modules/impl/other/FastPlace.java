@@ -11,7 +11,7 @@ public class FastPlace extends Module {
     private SliderSetting delay;
 
     public FastPlace() {
-        super("FastPlace", category.Other);
+        super("FastPlace", "快速放置", category.Other);
 
         this.registerSetting(delay = new SliderSetting("Delay", 1, 0, 3, 1));
     }

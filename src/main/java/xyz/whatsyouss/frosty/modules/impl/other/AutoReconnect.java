@@ -16,7 +16,7 @@ public class AutoReconnect extends Module {
     public Pair<ServerAddress, ServerData> lastServerConnection;
 
     public AutoReconnect() {
-        super("AutoReconnect", category.Other);
+        super("AutoReconnect", "自动重连", category.Other);
 
         this.registerSetting(delay = new SliderSetting("Delay", 1000, 500, 5000, 100));
     }

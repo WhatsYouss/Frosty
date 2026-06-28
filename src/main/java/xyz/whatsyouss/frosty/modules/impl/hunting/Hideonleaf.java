@@ -34,7 +34,7 @@ public class Hideonleaf extends Module {
     private SliderSetting offset, range;
 
     public Hideonleaf() {
-        super("Shulkers", category.Hunting);
+        super("Shulkers", "树岛潜影贝", category.Hunting);
 
         this.registerSetting(esp = new ButtonSetting("ESP", true));
         this.registerSetting(hit = new ButtonSetting("Attack", true));

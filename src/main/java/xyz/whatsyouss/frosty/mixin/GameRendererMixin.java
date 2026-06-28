@@ -42,7 +42,7 @@ public abstract class GameRendererMixin {
 
     @Shadow
     @Final
-    private ProjectionMatrixBuffer levelProjectionMatrixBuffer;
+    public ProjectionMatrixBuffer levelProjectionMatrixBuffer;
 
     @ModifyExpressionValue(method = "renderLevel", at = @At(value = "INVOKE", target = "Ljava/lang/Math;max(FF)F", ordinal = 0))
     private float applyCameraTransformationsMathHelperLerpProxy(float original) {

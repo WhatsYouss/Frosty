@@ -22,6 +22,8 @@ public class ConfigManager {
     private static final Gson gson = new GsonBuilder().setPrettyPrinting().create();
 
     private static JsonObject serverConfig;
+    private static boolean firstDefaultConfigMissing;
+    private static boolean languagePromptCompleted;
 
 
     public static void createConfigDir() {
@@ -229,7 +231,10 @@ public class ConfigManager {
     }
 
     public static void loadConfig() {
-        if (!Files.exists(DEFAULT_CONFIG)) return;
+        if (!Files.exists(DEFAULT_CONFIG)) {
+            firstDefaultConfigMissing = true;
+            return;
+        }
         try (Reader reader = Files.newBufferedReader(DEFAULT_CONFIG)) {
             JsonObject config = gson.fromJson(reader, JsonObject.class);
             if (config == null) return;
@@ -274,5 +279,14 @@ public class ConfigManager {
         } catch (IOException e) {
             System.err.println("Failed to load config: " + e.getMessage());
         }
+    }
+
+    public static boolean shouldShowLanguagePrompt() {
+        return firstDefaultConfigMissing && !languagePromptCompleted;
+    }
+
+    public static void completeLanguagePrompt() {
+        languagePromptCompleted = true;
+        firstDefaultConfigMissing = false;
     }
 }

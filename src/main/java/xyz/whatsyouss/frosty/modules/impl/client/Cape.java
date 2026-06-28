@@ -19,7 +19,7 @@ public class Cape extends Module {
     private Identifier currentCape = null;
 
     public Cape() {
-        super("Cape", category.Client);
+        super("Cape", "披风", category.Client);
 
         this.registerSetting(cape = new SelectSetting("Cape", 0, capes));
         this.registerSetting(customCape = new InputSetting("File name", 16, ""));

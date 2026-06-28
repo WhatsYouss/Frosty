@@ -25,7 +25,7 @@ public class TPS extends Module {
     private int strColor;
 
     public TPS() {
-        super("TPS", category.Render);
+        super("TPS", "服务器刻数", category.Render);
         this.registerSetting(color = new SelectSetting("Color", 0, colors));
     }
 

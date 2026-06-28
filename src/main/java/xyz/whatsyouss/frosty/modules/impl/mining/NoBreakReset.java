@@ -14,7 +14,7 @@ public class NoBreakReset extends Module {
     private String holding;
 
     public NoBreakReset() {
-        super("NoBreakReset", category.Mining);
+        super("NoBreakReset", "无破坏重置", category.Mining);
     }
 
     @EventHandler

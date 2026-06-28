@@ -35,6 +35,8 @@ public class Rotations {
     private static float smoothStartYaw;
     private static float smoothStartPitch;
     private static int lastRotationUpdateTick = -1;
+    private static double silentSidewaysError;
+    private static double silentForwardError;
 
     private static class RotationRequest {
         public final float yaw;
@@ -138,6 +140,7 @@ public class Rotations {
         smoothRotating = false;
         smoothProgress = 0f;
         lastRotationUpdateTick = -1;
+        resetSilentMoveFix();
         if (packetSent) {
             packetSent = false;
         }
@@ -231,6 +234,7 @@ public class Rotations {
 
     public static DirectionalInput calculateCorrectedInput(DirectionalInput originalInput, float originalYaw, float serverYaw) {
         if (!originalInput.isMoving()) {
+            resetSilentMoveFix();
             return DirectionalInput.NONE;
         }
 
@@ -240,7 +244,54 @@ public class Rotations {
 
         Vec2 correctedMovement = rotateMovementVector(originalMovement, yawDifference);
 
+        if (MoveFix.isSilent()) {
+            return getSilentInputFromMovementVector(correctedMovement);
+        }
+
         return getInputFromMovementVector(correctedMovement);
+    }
+
+    private static DirectionalInput getSilentInputFromMovementVector(Vec2 movement) {
+        float max = Math.max(Math.abs(movement.x), Math.abs(movement.y));
+        if (max < 0.1f) {
+            resetSilentMoveFix();
+            return DirectionalInput.NONE;
+        }
+
+        double desiredSideways = Mth.clamp(movement.x / max, -1.0f, 1.0f);
+        double desiredForward = Mth.clamp(movement.y / max, -1.0f, 1.0f);
+
+        int sideways = getDitheredAxis(desiredSideways, true);
+        int forward = getDitheredAxis(desiredForward, false);
+
+        return new DirectionalInput(forward > 0, forward < 0, sideways < 0, sideways > 0);
+    }
+
+    private static int getDitheredAxis(double desired, boolean sideways) {
+        double error = sideways ? silentSidewaysError : silentForwardError;
+        error += desired;
+
+        int output = 0;
+        if (error >= 0.5) {
+            output = 1;
+            error -= 1.0;
+        } else if (error <= -0.5) {
+            output = -1;
+            error += 1.0;
+        }
+
+        if (sideways) {
+            silentSidewaysError = Mth.clamp(error, -1.0, 1.0);
+        } else {
+            silentForwardError = Mth.clamp(error, -1.0, 1.0);
+        }
+
+        return output;
+    }
+
+    private static void resetSilentMoveFix() {
+        silentSidewaysError = 0.0;
+        silentForwardError = 0.0;
     }
 
     private static Vec2 getMovementVectorFromInput(DirectionalInput input) {

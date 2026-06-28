@@ -17,7 +17,7 @@ public class StarredMobESP extends Module {
     private static final String[] STARS = new String[]{"✯", "✰", "★", "☆"};
 
     public StarredMobESP() {
-        super("StarredMobESP", category.Render);
+        super("StarredMobESP", "星标怪透视", category.Render);
     }
 
     @EventHandler

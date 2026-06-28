@@ -98,6 +98,8 @@ public class ModuleManager {
     public static Eagle eagle;
     public static Blink blink;
     public static DojoHelper dojoHelper;
+    public static AutoHarp autoHarp;
+    public static ScrollableTooltips scrollableTooltips;
 
     public void register() {
         this.addModule(tps = new TPS());
@@ -166,6 +168,8 @@ public class ModuleManager {
         this.addModule(eagle = new Eagle());
         this.addModule(blink = new Blink());
         this.addModule(dojoHelper = new DojoHelper());
+        this.addModule(autoHarp = new AutoHarp());
+        this.addModule(scrollableTooltips = new ScrollableTooltips());
         modules.sort(Comparator.comparing(Module::getName));
     }
 

@@ -8,7 +8,7 @@ public class ChatCopier extends Module {
     public ButtonSetting stripColorCode;
 
     public ChatCopier() {
-        super("ChatCopier", category.Client);
+        super("ChatCopier", "聊天复制", category.Client);
 
         this.registerSetting(stripColorCode = new ButtonSetting("Strip color code", true));
     }

@@ -31,7 +31,7 @@ public class CropNuker extends Module {
     private int instantTickCounter = 0;
 
     public CropNuker() {
-        super("CropNuker", category.Farming);
+        super("CropNuker", "作物光环", category.Farming);
 
         this.registerSetting(bps = new SliderSetting("BPS", 20 ,3, 20, 1));
         this.registerSetting(ignoreBaby = new ButtonSetting("Ignore baby", true));

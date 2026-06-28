@@ -4,6 +4,6 @@ import xyz.whatsyouss.frosty.modules.Module;
 
 public class NoBlur extends Module {
     public NoBlur() {
-        super("NoBlur", category.Render);
+        super("NoBlur", "无模糊", category.Render);
     }
 }

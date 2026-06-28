@@ -8,7 +8,7 @@ public class NoOverlay extends Module {
     public ButtonSetting fire, water, inWall;
 
     public NoOverlay() {
-        super("NoOverlay", category.Render);
+        super("NoOverlay", "无视野遮挡", category.Render);
 
         this.registerSetting(fire = new ButtonSetting("Fire", true));
         this.registerSetting(water = new ButtonSetting("Water", true));

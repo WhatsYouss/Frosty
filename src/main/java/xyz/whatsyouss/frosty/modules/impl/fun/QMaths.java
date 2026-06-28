@@ -28,7 +28,7 @@ public class QMaths extends Module {
     private final Random random = new Random();
     private static final String CHAR_POOL = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
     private boolean active = false;
-    private boolean waitingForSolve = false;   // 收到题型行后等 Solve:
+    private boolean waitingForSolve = false;
     private final List<Integer> digits = new ArrayList<>();
     private int digitIndex = 0;
     private boolean readyToSubmit = false;
@@ -55,9 +55,9 @@ public class QMaths extends Module {
             Pattern.compile("Convert to decimal:\\s*([01]+)");
 
     public QMaths() {
-        super("QMaths", category.Fun);
+        super("QMaths", "速算", category.Fun);
 
-        this.registerSetting(delay = new SliderSetting("Delay", "ms", 700, 500, 2500, 50));
+        this.registerSetting(delay = new SliderSetting("Delay", "ms", 700, 200, 2500, 50));
         this.registerSetting(say = new ButtonSetting("Say", true));
         this.registerSetting(antiDupe = new ButtonSetting("Anti Duplicate", true));
     }
@@ -233,8 +233,8 @@ public class QMaths extends Module {
 
         if (mc.gameMode != null) {
             mc.gameMode.handleContainerInput(
-                    handler.containerId, slotId, 0,
-                    ContainerInput.PICKUP, mc.player);
+                    handler.containerId, slotId, 2,
+                    ContainerInput.CLONE, mc.player);
         }
     }
 

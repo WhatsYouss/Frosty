@@ -6,17 +6,16 @@ import org.lwjgl.glfw.GLFW;
 import xyz.whatsyouss.frosty.Frosty;
 import xyz.whatsyouss.frosty.events.impl.SettingUpdateEvent;
 import xyz.whatsyouss.frosty.events.impl.MouseScrollEvent;
-import xyz.whatsyouss.frosty.modules.impl.render.FreeLook;
 import xyz.whatsyouss.frosty.settings.Setting;
 import xyz.whatsyouss.frosty.settings.impl.ButtonSetting;
 import xyz.whatsyouss.frosty.settings.impl.KeyBindSetting;
 import xyz.whatsyouss.frosty.settings.impl.SliderSetting;
 import xyz.whatsyouss.frosty.utility.Utils;
+import xyz.whatsyouss.frosty.modules.impl.client.UI;
 
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Objects;
 
 public class Module {
     public static Minecraft mc = Minecraft.getInstance();
@@ -127,7 +126,7 @@ public class Module {
     }
 
     public String getTransName() {
-        if (this.moduleCnName != null && !this.moduleCnName.isEmpty()) {
+        if (this.moduleCnName != null && !this.moduleCnName.isEmpty() && UI.lang.getValue() == 1) {
             return this.moduleCnName;
         }
         return this.moduleName;
@@ -158,7 +157,7 @@ public class Module {
     }
 
     public String getNameInHud() {
-        return this.moduleName;
+        return this.getTransName();
     }
 
     public ArrayList<Setting> getSettings() {
@@ -200,13 +199,10 @@ public class Module {
 
             boolean isPressed;
             if (this.keycode == 1069 || this.keycode == 1070) {
-                // Mouse scroll detection
                 isPressed = isScrollDown(this.keycode);
             } else if (this.keycode >= 1000) {
-                // Mouse button detection
                 isPressed = GLFW.glfwGetMouseButton(windowHandle, this.keycode - 1000) == GLFW.GLFW_PRESS;
             } else {
-                // Keyboard detection
                 isPressed = GLFW.glfwGetKey(windowHandle, this.keycode) == GLFW.GLFW_PRESS;
             }
             if (this.keycode == ModuleManager.freeLook.getKeycode() && ModuleManager.freeLook.mode.getValue() == 1) {

@@ -25,7 +25,7 @@ import java.awt.Color;
 public class ChestESP extends Module {
 
     public ChestESP() {
-        super("ChestESP", category.Render);
+        super("ChestESP", "容器透视", category.Render);
     }
 
     @EventHandler

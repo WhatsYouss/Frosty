@@ -1,22 +1,23 @@
 package xyz.whatsyouss.frosty.modules.impl.client;
 
-import meteordevelopment.orbit.EventHandler;
 import com.mojang.blaze3d.platform.InputConstants;
 import xyz.whatsyouss.frosty.gui.ClickGui;
 import xyz.whatsyouss.frosty.modules.Module;
-import xyz.whatsyouss.frosty.settings.impl.InputSetting;
 import xyz.whatsyouss.frosty.settings.impl.SelectSetting;
-import xyz.whatsyouss.frosty.settings.impl.SliderSetting;
 import xyz.whatsyouss.frosty.utility.Utils;
 
 public class UI extends Module {
 
-    public SelectSetting clickGuiColor;
+    private String[] langs = new String[]{"English", "简体中文"};
     private String[] clickGuiColors = new String[] {"Light", "Dark"};
 
-    public UI() {
-        super("ClickGui", category.Client, InputConstants.KEY_RSHIFT);
+    public static SelectSetting lang;
+    public SelectSetting clickGuiColor;
 
+    public UI() {
+        super("ClickGui","用户界面", category.Client, InputConstants.KEY_RSHIFT);
+
+        this.registerSetting(lang = new SelectSetting("Language", 0, langs));
         this.registerSetting(clickGuiColor = new SelectSetting("Background Color", 0, clickGuiColors));
     }
 

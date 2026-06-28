@@ -84,7 +84,7 @@ public class CarnivalHelper extends Module {
     }
 
     public CarnivalHelper() {
-        super("CarnivalHelper", category.Other);
+        super("CarnivalHelper", "狂欢节助手", category.Other);
 
 //        this.registerSetting(autoFruitDigging = new ButtonSetting("Auto fruit digging", true));
         this.registerSetting(fishLatency = new SliderSetting("Fish latency", 75, 50, 300, 25));

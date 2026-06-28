@@ -21,7 +21,7 @@ public class LushlilacNuker extends Module {
     private long lastBreakTime;
 
     public LushlilacNuker() {
-        super("LushlilacNuker", Module.category.Foraging);
+        super("LushlilacNuker", "丁香光环", category.Foraging);
         this.registerSetting(range = new SliderSetting("Range", 4.2, 3, 6, 0.1));
     }
 

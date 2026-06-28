@@ -26,7 +26,7 @@ public class NoPlaceInteract extends Module {
     );
 
     public NoPlaceInteract() {
-        super("NoPlaceInteract", category.Other);
+        super("NoPlaceInteract", "无放置交互", category.Other);
 
         this.registerSetting(swing = new ButtonSetting("Swing", false));
     }

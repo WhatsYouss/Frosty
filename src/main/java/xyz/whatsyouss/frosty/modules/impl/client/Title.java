@@ -9,7 +9,7 @@ public class Title extends Module {
     public ButtonSetting keepOriginal;
 
     public Title() {
-        super("Title", category.Client);
+        super("Title", "游戏标题", category.Client);
 
         this.registerSetting(keepOriginal = new ButtonSetting("Keep original", true));
     }

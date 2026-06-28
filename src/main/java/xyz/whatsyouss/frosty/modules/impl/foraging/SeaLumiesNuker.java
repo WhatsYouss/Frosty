@@ -21,7 +21,7 @@ public class SeaLumiesNuker extends Module {
     private long lastBreakTime;
 
     public SeaLumiesNuker() {
-        super("SeaLumiesNuker", Module.category.Foraging);
+        super("SeaLumiesNuker", "海黄瓜光环", category.Foraging);
         this.registerSetting(range = new SliderSetting("Range", 4.2, 3, 6, 0.1));
     }
 

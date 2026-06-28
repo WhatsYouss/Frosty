@@ -3,20 +3,13 @@ package xyz.whatsyouss.frosty.modules.impl.mining;
 import meteordevelopment.orbit.EventHandler;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.level.block.Blocks;
-import net.minecraft.client.Minecraft;
-import com.mojang.blaze3d.vertex.PoseStack;
-import net.minecraft.server.commands.data.BlockDataAccessor;
 import net.minecraft.world.entity.decoration.ArmorStand;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.network.protocol.game.ServerboundPlayerActionPacket;
-import net.minecraft.world.scores.Scoreboard;
-import net.minecraft.network.chat.Component;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.phys.AABB;
-import net.minecraft.core.Direction;
 import net.minecraft.world.phys.Vec3;
-import xyz.whatsyouss.frosty.events.impl.PreUpdateEvent;
 import xyz.whatsyouss.frosty.events.impl.Render3DEvent;
 import xyz.whatsyouss.frosty.modules.Module;
 import xyz.whatsyouss.frosty.settings.impl.ButtonSetting;
@@ -25,7 +18,6 @@ import xyz.whatsyouss.frosty.utility.RenderUtils;
 import xyz.whatsyouss.frosty.utility.Utils;
 import java.awt.*;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 public class FrozenTreasure extends Module {
@@ -50,7 +42,7 @@ public class FrozenTreasure extends Module {
     }};
 
     public FrozenTreasure() {
-        super("FrozenTreasure", category.Mining);
+        super("FrozenTreasure", "冰洞宝藏", category.Mining);
         this.registerSetting(esp = new ButtonSetting("ESP", true));
         this.registerSetting(nuker = new ButtonSetting("Nuker", false));
         this.registerSetting(ignoreIcebait = new ButtonSetting("Ignore Ice Bait", true));

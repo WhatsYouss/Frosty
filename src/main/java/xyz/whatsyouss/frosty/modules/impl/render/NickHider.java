@@ -19,7 +19,7 @@ public class NickHider extends Module {
     private static String lastNick;
     
     public NickHider() {
-        super("NickHider", category.Render);
+        super("NickHider", "匿名保护", category.Render);
 
         this.registerSetting(name = new InputSetting("Nick Name", 16, "You"));
         this.registerSetting(serverNick = new InputSetting("Server Nick", 16, ""));

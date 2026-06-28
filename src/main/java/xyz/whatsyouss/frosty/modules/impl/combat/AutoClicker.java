@@ -31,7 +31,7 @@ public class AutoClicker extends Module {
     private boolean pressingLeft, pressingRight;
 
     public AutoClicker() {
-        super("AutoClicker", category.Combat);
+        super("AutoClicker", "自动点击", category.Combat);
 
         this.registerSetting(mode = new SelectSetting("Mode", 0, modes));
         this.registerSetting(cps = new SliderSetting("CPS", 12, 15, 1, 20, 1));

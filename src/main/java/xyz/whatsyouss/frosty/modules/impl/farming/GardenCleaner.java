@@ -41,7 +41,7 @@ public class GardenCleaner extends Module {
     private int requiredTicks = 0;
 
     public GardenCleaner() {
-        super("GardenCleaner", category.Farming);
+        super("GardenCleaner", "花园清理", category.Farming);
 
         this.registerSetting(mode = new SelectSetting("Mode", 1, modes));
         this.registerSetting(bps = new SliderSetting("BPS", 10 ,1, 15, 1));

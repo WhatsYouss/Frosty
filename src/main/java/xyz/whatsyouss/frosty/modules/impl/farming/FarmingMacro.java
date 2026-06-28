@@ -58,7 +58,7 @@ public class FarmingMacro extends Module {
     private boolean pendingResume = false;
     private int pendingResumeTick = 0;
     public FarmingMacro() {
-        super("FarmingMacro", category.Farming);
+        super("FarmingMacro", "农业宏", category.Farming);
 
         this.registerSetting(face = new SelectSetting("Face", 0, FACES));
         this.registerSetting(pitch = new SliderSetting("Pitch", 0, -10, 10, 1));

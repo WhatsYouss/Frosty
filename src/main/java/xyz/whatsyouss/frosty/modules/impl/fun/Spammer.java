@@ -23,7 +23,7 @@ public class Spammer extends Module {
     private static final String CHAR_POOL = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
 
     public Spammer() {
-        super("Spammer", category.Fun);
+        super("Spammer", "刷屏", category.Fun);
 
         this.registerSetting(message1 = new InputSetting("Message 1", 25, "Frosty - Free 1.21.10 Skyblock Client", "/p xxx"));
         this.registerSetting(messageTwo = new ButtonSetting("Message two", false));

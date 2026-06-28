@@ -15,7 +15,7 @@ public class FarmingProtector extends Module {
     private SelectSetting sensitive;
 
     public FarmingProtector() {
-        super("FarmingProtector", category.Farming);
+        super("FarmingProtector", "农业保护", category.Farming);
 
 //        this.registerSetting(movement = new ButtonSetting("Movement", true));
 //        this.registerSetting(bps = new ButtonSetting("BPS", true));

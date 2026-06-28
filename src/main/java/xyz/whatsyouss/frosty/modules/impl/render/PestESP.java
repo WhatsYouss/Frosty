@@ -17,7 +17,7 @@ import java.awt.*;
 public class PestESP extends Module {
 
     public PestESP() {
-        super("PestESP", category.Render);
+        super("PestESP", "害虫透视", category.Render);
     }
 
     @EventHandler

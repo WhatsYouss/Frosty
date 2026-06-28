@@ -119,7 +119,7 @@ public class ClickGui extends Screen {
         context.fill((int) (x / scale), (int) (y / scale), (int) ((x + width) / scale), (int) ((y + 20) / scale),
                 isLight ? new Color(100, 100, 255).getRGB() : new Color(60, 60, 180).getRGB());
 
-        context.text(this.font, "Frosty 1.1.1", (int) ((x + width / 2) / scale), (int) ((y + 6) / scale), Color.WHITE.getRGB());
+        context.text(this.font, "Frosty 1.1.2", (int) ((x + width / 2) / scale), (int) ((y + 6) / scale), Color.WHITE.getRGB());
 
         context.fill((int) ((x + 5) / scale), (int) ((y + 25) / scale), (int) ((x + 65) / scale), (int) ((y + height - 5) / scale),
                 isLight ? new Color(230, 230, 230).getRGB() : new Color(70, 70, 70).getRGB());

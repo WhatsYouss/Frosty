@@ -46,7 +46,7 @@ public class MithrilMacro extends Module {
     private boolean startPacketSent = false;
 
     public MithrilMacro() {
-        super("MithrilMacro", category.Mining);
+        super("MithrilMacro", "秘银宏", category.Mining);
 
         this.registerSetting(prioritize = new SelectSetting("Prioritize", 0, mithrilTypes));
         this.registerSetting(rotateSmoothing = new SliderSetting("Rotate smoothing", 0, 0, 5, 1));

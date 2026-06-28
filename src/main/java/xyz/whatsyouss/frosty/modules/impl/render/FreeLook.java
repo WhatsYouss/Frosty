@@ -25,7 +25,7 @@ public class FreeLook extends Module {
 
 
     public FreeLook() {
-        super("FreeLook", category.Render, InputConstants.KEY_LALT);
+        super("FreeLook", "自由视角", category.Render, InputConstants.KEY_LALT);
 
         this.registerSetting(mode = new SelectSetting("Mode", 0, modes));
     }

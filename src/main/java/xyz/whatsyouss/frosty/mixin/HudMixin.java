@@ -41,7 +41,7 @@ public abstract class HudMixin {
         ci.cancel();
     }
 
-    @Inject(at = @At("TAIL"), method = "extractTabList(Lnet/minecraft/client/gui/GuiGraphicsExtractor;Lnet/minecraft/client/DeltaTracker;)V")
+    @Inject(at = @At("HEAD"), method = "extractTabList(Lnet/minecraft/client/gui/GuiGraphicsExtractor;Lnet/minecraft/client/DeltaTracker;)V")
     private void onRenderPlayerList(GuiGraphicsExtractor context, DeltaTracker tickCounter, CallbackInfo ci) {
         var mc = Minecraft.getInstance();
 
