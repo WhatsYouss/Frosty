@@ -24,6 +24,13 @@ repositories {
 		url = "https://jitpack.io"
 	}
 	maven {
+		name = "Modrinth"
+		url = "https://api.modrinth.com/maven"
+		content {
+			includeGroup "maven.modrinth"
+		}
+	}
+	maven {
 		name = 'swt-repo'
 		url = "https://maven-eclipse.github.io/maven"
 	}
@@ -43,6 +50,7 @@ dependencies {
 
 	implementation "net.fabricmc:fabric-loader:${project.loader_version}"
 	implementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_api_version}"
+	compileOnly "maven.modrinth:sodium:${project.sodium_version}"
 
 	libImpl("meteordevelopment:orbit:0.2.3")
 	implementation "meteordevelopment:orbit:0.2.3"
@@ -103,13 +111,7 @@ loom {
 	runs {
 		client {
 			vmArgs "-Dmixin.debug.export=true"
-			property "mixin.env.remapRefMap", "true"
-			property "mixin.env.refMapRemappingFile", "${projectDir}/build/tmp/refmap.json"
 		}
-	}
-
-	mixin {
-		defaultRefmapName.set("frosty.mixins.refmap.json")
 	}
 }
 

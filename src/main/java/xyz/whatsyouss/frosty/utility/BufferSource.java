@@ -13,15 +13,36 @@ import net.minecraft.client.renderer.rendertype.RenderType;
  * Simple wrapper around {@link StagedVertexBuffer} to replace Minecraft's
  * {@code MultiBufferSource} which was removed in 26.2-snapshot-5.
  */
-public final class BufferSource
+public final class BufferSource implements AutoCloseable
 {
-    private final StagedVertexBuffer stagedBuffer = new StagedVertexBuffer(
-            () -> "BufferSource", RenderType.BIG_BUFFER_SIZE);
+    private final StagedVertexBuffer stagedBuffer;
     private final List<StagedVertexBuffer.Draw> draws = new ArrayList<>();
     private final List<RenderType> drawTypes = new ArrayList<>();
+    private final boolean reusable;
+    private boolean closed;
+
+    public BufferSource()
+    {
+        this(false);
+    }
+
+    private BufferSource(boolean reusable)
+    {
+        this.reusable = reusable;
+        this.stagedBuffer = new StagedVertexBuffer(
+                () -> "BufferSource", RenderType.BIG_BUFFER_SIZE);
+    }
+
+    public static BufferSource reusable()
+    {
+        return new BufferSource(true);
+    }
 
     public VertexConsumer getBuffer(RenderType renderType)
     {
+        if(closed)
+            throw new IllegalStateException("BufferSource is closed");
+
         if(!drawTypes.isEmpty() && drawTypes.getLast() == renderType
                 && renderType.canConsolidateConsecutiveGeometry())
             return stagedBuffer.getVertexBuilder(draws.getLast());
@@ -48,14 +69,28 @@ public final class BufferSource
             for(int i = 0; i < draws.size(); i++)
                 draw(drawTypes.get(i), draws.get(i));
 
-            stagedBuffer.endDraw();
+            if(reusable)
+                stagedBuffer.endFrame();
+            else
+                stagedBuffer.endDraw();
 
         }finally
         {
             draws.clear();
             drawTypes.clear();
-            stagedBuffer.close();
+            if(!reusable)
+                close();
         }
+    }
+
+    @Override
+    public void close()
+    {
+        if(closed)
+            return;
+
+        closed = true;
+        stagedBuffer.close();
     }
 
     private void draw(RenderType type, StagedVertexBuffer.Draw draw)

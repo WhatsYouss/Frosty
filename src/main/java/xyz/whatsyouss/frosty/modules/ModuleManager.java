@@ -41,6 +41,7 @@ public class ModuleManager {
     public static Sprint sprint;
     public static AntiDebuff antiDebuff;
     public static Fullbright fullbright;
+    public static Xray xray;
     public static NoHurtCam noHurtCam;
     public static AutoFish autoFish;
     public static LushlilacNuker lushlilacNuker;
@@ -113,6 +114,7 @@ public class ModuleManager {
         this.addModule(velocity = new Velocity());
         this.addModule(antiDebuff = new AntiDebuff());
         this.addModule(fullbright = new Fullbright());
+        this.addModule(xray = new Xray());
         this.addModule(noHurtCam = new NoHurtCam());
         this.addModule(autoFish = new AutoFish());
         this.addModule(lushlilacNuker = new LushlilacNuker());
