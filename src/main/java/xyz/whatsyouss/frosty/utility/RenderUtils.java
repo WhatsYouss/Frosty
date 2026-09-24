@@ -26,6 +26,8 @@ import static xyz.whatsyouss.frosty.Frosty.mc;
 
 public class RenderUtils {
 
+    public record ColoredBox(AABB box, Color color) {}
+
     public static Vec3 center;
 
     private static final ByteBufferBuilder BYTE_BUFFER = new ByteBufferBuilder(65536);
@@ -178,6 +180,36 @@ public class RenderUtils {
         drawSolidBoxInternal(stack, buffer, relative, color);
 
         vcp.endBatch(layer);
+    }
+
+    public static void drawBoxes(PoseStack stack, Collection<ColoredBox> boxes, float fillAlpha,
+                                 float outlineAlpha, float lineWidth, boolean drawFill,
+                                 boolean drawOutline, boolean depthTest) {
+        if (boxes.isEmpty()) return;
+
+        MultiBufferSource.BufferSource buffers = getVCP();
+        Vec3 cam = mc.getEntityRenderDispatcher().camera.position();
+        if (drawFill) {
+            RenderType layer = RenderLayers.getQuads(depthTest);
+            VertexConsumer buffer = buffers.getBuffer(layer);
+            for (ColoredBox box : boxes) {
+                drawSolidBoxInternal(stack, buffer, box.box().move(-cam.x, -cam.y, -cam.z), withAlpha(box.color(), fillAlpha));
+            }
+            buffers.endBatch(layer);
+        }
+        if (drawOutline) {
+            RenderType layer = RenderLayers.getLines(depthTest);
+            VertexConsumer buffer = buffers.getBuffer(layer);
+            for (ColoredBox box : boxes) {
+                drawOutlinedBoxInternal(stack, buffer, box.box().move(-cam.x, -cam.y, -cam.z), withAlpha(box.color(), outlineAlpha), lineWidth);
+            }
+            buffers.endBatch(layer);
+        }
+    }
+
+    private static int withAlpha(Color color, float alpha) {
+        int value = Mth.clamp(Math.round(alpha * 255.0f), 0, 255);
+        return value << 24 | color.getRGB() & 0x00FFFFFF;
     }
 
     private static void drawSolidBoxInternal(PoseStack matrices, VertexConsumer buffer, AABB box, int color) {

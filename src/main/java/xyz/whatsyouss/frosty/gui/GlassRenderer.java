@@ -24,6 +24,7 @@ import java.util.OptionalInt;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.resources.Identifier;
+import xyz.whatsyouss.frosty.modules.impl.client.UI;
 
 public final class GlassRenderer {
     private static final int BLUR_RADIUS = 18;
@@ -147,7 +148,8 @@ public final class GlassRenderer {
         float panelY = height - (panel.y + panel.height) * scale;
         float panelWidth = panel.width * scale;
         float panelHeight = panel.height * scale;
-        float tint = (panel.light ? 0.08f : 0.12f) + panel.opacity * (panel.light ? 0.18f : 0.24f);
+        int mode = (int) UI.liquidGlassMode.getValue();
+        float tint = mode == 0 ? (panel.light ? 0.00f : 0.01f) : (panel.light ? 0.85f : 0.89f);
         float surface = 0.28f + panel.opacity * 0.62f;
 
         try (GpuBuffer.MappedView mapped = RenderSystem.getDevice().createCommandEncoder().mapBuffer(panelInfo, false, true)) {

@@ -174,6 +174,6 @@ public class GuiMove extends Module {
 
     @Override
     public String getInfo() {
-        return mode.getOption();
+        return mode.getTransOption();
     }
 }
