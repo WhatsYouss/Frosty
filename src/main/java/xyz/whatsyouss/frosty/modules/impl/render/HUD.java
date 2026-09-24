@@ -3,7 +3,6 @@ package xyz.whatsyouss.frosty.modules.impl.render;
 import meteordevelopment.orbit.EventHandler;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
-import net.minecraft.client.gui.screens.ChatScreen;
 import net.minecraft.network.chat.Component;
 import org.joml.Matrix3x2fStack;
 import xyz.whatsyouss.frosty.events.impl.Render2DEvent;
@@ -12,7 +11,6 @@ import xyz.whatsyouss.frosty.modules.ModuleManager;
 import xyz.whatsyouss.frosty.settings.impl.ButtonSetting;
 import xyz.whatsyouss.frosty.settings.impl.SelectSetting;
 import xyz.whatsyouss.frosty.settings.impl.SliderSetting;
-import xyz.whatsyouss.frosty.utility.RenderUtils;
 import xyz.whatsyouss.frosty.utility.Theme;
 import xyz.whatsyouss.frosty.utility.Utils;
 

@@ -100,6 +100,8 @@ public class ModuleManager {
     public static MurderMystery murderMystery;
     public static Nametags nametags;
     public static AntiTexture antiTexture;
+    public static Xray xray;
+    public static WormLavaESP wormLavaESP;
 
     public void register() {
         this.addModule(tps = new TPS());
@@ -172,6 +174,8 @@ public class ModuleManager {
         this.addModule(autoGift = new AutoGift());
         this.addModule(murderMystery = new MurderMystery());
         this.addModule(antiTexture = new AntiTexture());
+        this.addModule(xray = new Xray());
+        this.addModule(wormLavaESP = new WormLavaESP());
         modules.sort(Comparator.comparing(Module::getName));
     }
 

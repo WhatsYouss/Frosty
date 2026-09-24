@@ -5,6 +5,8 @@
   "refmap": "frosty.mixins.refmap.json",
   "mixins": [
     "AvatarRendererMixin",
+    "BlockEntityRenderDispatcherMixin",
+    "BlockStateBaseMixin",
     "BossHealthOverlayMixin",
     "CameraMixin",
     "ChatScreenMixin",
@@ -19,6 +21,7 @@
     "EntityRenderDispatcherMixin",
     "EntityRendererMixin",
     "EntityRenderStateMixin",
+    "FluidRendererMixin",
     "GameRendererMixin",
     "GuiGraphicsExtractorMixin",
     "HudMixin",
@@ -36,6 +39,7 @@
     "LoadingOverlayMixin",
     "LocalPlayerMixin",
     "MinecraftMixin",
+    "ModelBlockRendererMixin",
     "MouseHandlerMixin",
     "MultiPlayerGameModeMixin",
     "PackMixin",
@@ -43,6 +47,7 @@
     "PlayerMixin",
     "ScreenEffectRendererMixin",
     "ScreenMixin",
+    "SectionCompilerMixin",
     "ServerboundUseItemPacketMixin",
     "StringDecomposerMixin",
     "SubmitNodeCollectionMixin",
@@ -52,7 +57,12 @@
     "accessor.AbstractContainerScreenAccessor",
     "accessor.ClientboundSetEntityMotionPacketAccessor",
     "accessor.KeyMappingAccessor",
-    "accessor.MinecraftAccessor"
+    "accessor.MinecraftAccessor",
+    "indigo.AltModelBlockRendererImplMixin",
+    "sodium.AbstractBlockRenderContextMixin",
+    "sodium.BlockRendererMixin",
+    "sodium.BlockRendererMixin",
+    "sodium.DefaultFluidRendererMixin"
   ],
   "injectors": {
     "defaultRequire": 1
