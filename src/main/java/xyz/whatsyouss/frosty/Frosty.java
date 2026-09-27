@@ -28,6 +28,7 @@ import java.util.function.Supplier;
 
 public class Frosty implements ModInitializer {
 	public static final String MOD_ID = "frosty";
+	public static final String MOD_VERSION = "1.3.0";
 	public static Minecraft mc;
 	public static final IEventBus EVENT_BUS = new EventBus();
 	boolean applied = false;

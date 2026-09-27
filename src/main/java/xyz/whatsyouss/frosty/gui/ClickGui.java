@@ -130,7 +130,8 @@ public class ClickGui extends Screen {
                     isLight ? new Color(240, 240, 240).getRGB() : new Color(60, 60, 60).getRGB());
         }
 
-        context.text(this.font, "Frosty 1.3.0", (int) ((x + width / 2) / scale), (int) ((y + 6) / scale), Color.WHITE.getRGB());
+        String version = Frosty.MOD_VERSION;
+        context.text(this.font, "Frosty " + version, (int) ((x + width / 2) / scale), (int) ((y + 6) / scale), Color.WHITE.getRGB());
 
         for (CategoryComponent component : categoryComponents) {
             component.render(context, mouseX, mouseY, delta);

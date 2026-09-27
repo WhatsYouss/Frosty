@@ -3,7 +3,6 @@ package xyz.whatsyouss.frosty.modules.impl.render;
 import meteordevelopment.orbit.EventHandler;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
-import net.minecraft.client.gui.screens.ChatScreen;
 import net.minecraft.network.chat.Component;
 import org.joml.Matrix3x2fStack;
 import xyz.whatsyouss.frosty.events.impl.Render2DEvent;
@@ -12,7 +11,6 @@ import xyz.whatsyouss.frosty.modules.ModuleManager;
 import xyz.whatsyouss.frosty.settings.impl.ButtonSetting;
 import xyz.whatsyouss.frosty.settings.impl.SelectSetting;
 import xyz.whatsyouss.frosty.settings.impl.SliderSetting;
-import xyz.whatsyouss.frosty.utility.RenderUtils;
 import xyz.whatsyouss.frosty.utility.Theme;
 import xyz.whatsyouss.frosty.utility.Utils;
 
@@ -26,8 +24,8 @@ public class HUD extends Module {
     private ButtonSetting flow, suffix, bar, background;
     private SliderSetting opacity, offset;
 
-    private String[] colors = new String[] {"Rainbow", "Cherry", "Cotton candy", "Flare", "Flower", "Gold", "Grayscale", "Royal", "Sky", "Vine"};
-    private String[] CNcolors = new String[] {"彩虹", "粉樱", "棉花糖", "炽焰", "繁花", "流金", "灰阶", "皇室蓝", "晴空", "青藤"};
+    private String[] colors = new String[] {"Rainbow", "Cherry", "Cotton candy", "Flare", "Flower", "Gold", "Grayscale", "Royal", "Sky", "Vine", "Urban"};
+    private String[] CNcolors = new String[] {"彩虹", "粉樱", "棉花糖", "炽焰", "繁花", "流金", "灰阶", "皇室蓝", "晴空", "青藤", "都市"};
 
     private static int MARGIN = 5;
     private static final int INFO_COLOR = 0xFFA0A0A0;
