@@ -17,6 +17,8 @@ import xyz.whatsyouss.frosty.events.impl.PostUpdateEvent;
 import xyz.whatsyouss.frosty.events.impl.PreUpdateEvent;
 import xyz.whatsyouss.frosty.gui.LanguageSelectScreen;
 import xyz.whatsyouss.frosty.modules.ModuleManager;
+import xyz.whatsyouss.frosty.utility.UpdateChecker;
+import xyz.whatsyouss.frosty.utility.Utils;
 
 @Mixin(Minecraft.class)
 public abstract class MinecraftMixin {
@@ -30,10 +32,14 @@ public abstract class MinecraftMixin {
     @Unique
     private boolean frosty$languagePromptShown;
 
+    @Unique
+    private boolean frosty$skyblockUpdateChecked;
+
     @Inject(method = "<init>", at = @At("TAIL"))
     private void onInit(CallbackInfo info) {
         ConfigManager.loadConfig();
         ConfigManager.loadServerConfig();
+        UpdateChecker.requestStartupCheck();
     }
 
     @Inject(method = "createTitle", at = @At("RETURN"), cancellable = true)
@@ -45,7 +51,17 @@ public abstract class MinecraftMixin {
     }
     @Inject(at = @At("HEAD"), method = "tick()V")
     public void onPreTick(CallbackInfo info) {
-        if (level != null && player != null) {
+        if (Utils.nullCheck()) {
+            if (!frosty$skyblockUpdateChecked) {
+                String sidebar = Utils.stripColor(Utils.getScoreboardSidebarLines().toString().toLowerCase());
+                if (sidebar.contains("skyblock")) {
+                    frosty$skyblockUpdateChecked = true;
+                    UpdateChecker.notifyIfAvailable();
+                    if (!ModuleManager.update.ignoreNotifications.isToggled()) {
+                        Utils.addChatMessage("Ignore this notification in Module-Update", "在版本更新模块中忽略该提示");
+                    }
+                }
+            }
             Frosty.EVENT_BUS.post(new PreUpdateEvent());
         }
     }

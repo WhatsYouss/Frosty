@@ -17,8 +17,8 @@ import java.util.ArrayDeque;
 
 public class TPS extends Module {
 
-    private String[] colors = new String[] {"Rainbow", "Cherry", "Cotton candy", "Flare", "Flower", "Gold", "Grayscale", "Royal", "Sky", "Vine"};
-    private String[] CNcolors = new String[] {"彩虹", "粉樱", "棉花糖", "炽焰", "繁花", "流金", "灰阶", "皇室蓝", "晴空", "青藤"};
+    private String[] colors = new String[] {"Rainbow", "Cherry", "Cotton candy", "Flare", "Flower", "Gold", "Grayscale", "Royal", "Sky", "Vine", "Urban"};
+    private String[] CNcolors = new String[] {"彩虹", "粉樱", "棉花糖", "炽焰", "繁花", "流金", "灰阶", "皇室蓝", "晴空", "青藤", "都市"};
 
     private SelectSetting color;
 

@@ -37,6 +37,7 @@ import org.jetbrains.annotations.Nullable;
 import org.joml.Matrix4f;
 import org.joml.Vector3d;
 import xyz.whatsyouss.frosty.mixin.accessor.MinecraftAccessor;
+import xyz.whatsyouss.frosty.modules.impl.client.UI;
 import xyz.whatsyouss.frosty.settings.impl.SliderSetting;
 
 public class Utils {
@@ -55,6 +56,26 @@ public class Utils {
     public static void addModuleMessage(String moduleName, String message) {
         if (mc.player != null) {
             mc.player.sendSystemMessage(Component.literal("§7[§9F§br§9o§bs§9t§by§7] " + "§7[§f§l" + moduleName + "§7] " + message));
+        }
+    }
+
+    public static void addChatMessage(String message, String messageCN) {
+        if (mc.player != null) {
+            if (UI.lang.getValue() == 1) {
+                mc.player.sendSystemMessage(Component.literal("§7[§9F§br§9o§bs§9t§by§7] " + messageCN));
+            } else {
+                mc.player.sendSystemMessage(Component.literal("§7[§9F§br§9o§bs§9t§by§7] " + message));
+            }
+        }
+    }
+
+    public static void addModuleMessage(String moduleName, String message, String messageCN) {
+        if (mc.player != null) {
+            if (UI.lang.getValue() == 1) {
+                mc.player.sendSystemMessage(Component.literal("§7[§9F§br§9o§bs§9t§by§7] " + "§7[§f§l" + moduleName + "§7] " + messageCN));
+            } else {
+                mc.player.sendSystemMessage(Component.literal("§7[§9F§br§9o§bs§9t§by§7] " + "§7[§f§l" + moduleName + "§7] " + message));
+            }
         }
     }
 
