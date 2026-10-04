@@ -2,6 +2,7 @@ package xyz.whatsyouss.frosty.modules.impl.farming;
 
 import meteordevelopment.orbit.EventHandler;
 import net.minecraft.client.KeyMapping;
+import org.lwjgl.glfw.GLFW;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.item.HoeItem;
 import net.minecraft.core.BlockPos;
@@ -9,6 +10,7 @@ import net.minecraft.util.Mth;
 import net.minecraft.world.phys.Vec3;
 import xyz.whatsyouss.frosty.events.impl.PreUpdateEvent;
 import xyz.whatsyouss.frosty.events.impl.Render3DEvent;
+import xyz.whatsyouss.frosty.mixin.accessor.MinecraftAccessor;
 import xyz.whatsyouss.frosty.modules.Module;
 import xyz.whatsyouss.frosty.modules.ModuleManager;
 import xyz.whatsyouss.frosty.settings.impl.ButtonSetting;
@@ -20,10 +22,15 @@ import xyz.whatsyouss.frosty.utility.Utils;
 import java.awt.Color;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.ThreadLocalRandom;
 
 public class FarmingMacro extends Module {
 
     private static final double ARRIVAL_XZ = 0.45;
+    private static final double ROUTE_CORRIDOR = 0.75;
+    private static final double MAX_GATE_OVERSHOOT = 1.25;
+    private static final double RECOVERY_EXIT_CORRIDOR = 0.35;
+    private static final int STALLED_MOVE_TICKS = 14;
     private static final float YAW_SNAP_DEG = 2.0f;
     private static final int TURN_MAX_TICKS = 40;
     private static final int PRE_WARP_TICKS = 20;
@@ -32,21 +39,29 @@ public class FarmingMacro extends Module {
     private static final double WARP_DETECT_DIST = 8.0;
     private static final int PENDING_RESUME_TIMEOUT = 200;
     private final List<double[]> waypoints = new ArrayList<>();
-    private SelectSetting face;
-    private String[] FACES = new String[]{"North", "South", "East", "West"};
-    private String[] CNFACES = new String[]{"北", "南", "东", "西"};
-    private SliderSetting pitch, stopTime, triggerAmount;
+
+    private SelectSetting face, hold;
+    private String[] FACES = new String[]{"North", "South", "East", "West", "Custom"};
+    private String[] FACESCN = new String[]{"北", "南", "东", "西", "自定义"};
+    private String[] HOLDS = new String[]{"NONE", "W", "S"};
+    private String[] HOLDSCN = new String[]{"无", "W", "S"};
+    private SliderSetting yaw, pitch, stopTime, triggerAmount;
     private ButtonSetting rotateOnFinish, pestCleaner, rewarpOnly;
+
     private State state = State.IDLE;
     private int targetIndex = 1;
     private int lapCount = 0;
     private int dwellTicks = 0;
+    private int dwellDurationTicks = 1;
+    private int stalledMoveTicks = 0;
+    private double previousRemaining = Double.POSITIVE_INFINITY;
+    private boolean recoveringWaypoint = false;
     private int turnTicks = 0;
     private int preWarpTicks = 0;
     private int warpCooldown = 0;
     private int warpTimeout = 0;
 
-    private boolean awaitingGrab = false;
+    private boolean awaitingStart = false;
     private boolean pestPaused = false;
     private int pestResumePt = 1;
     private boolean pestCleanCompletedLap = false;
@@ -62,9 +77,11 @@ public class FarmingMacro extends Module {
     public FarmingMacro() {
         super("FarmingMacro", "农业宏", category.Farming);
 
-        this.registerSetting(face = new SelectSetting("Face", "朝向", 0, FACES, CNFACES));
+        this.registerSetting(face = new SelectSetting("Face", "朝向", 0, FACES, FACESCN));
+        this.registerSetting(yaw = new SliderSetting("Yaw", 0, -180, 180, 1, "偏航角"));
         this.registerSetting(pitch = new SliderSetting("Pitch", 0, -90, 90, 1, "俯仰角"));
-        this.registerSetting(stopTime = new SliderSetting("Stop time", 500, 100, 6000, 50, "刹车时长"));
+        this.registerSetting(hold = new SelectSetting("Hold", "长按", 0, HOLDS, HOLDSCN));
+        this.registerSetting(stopTime = new SliderSetting("Stop time", 500, 1000, 100, 6000, 50, "刹车时长"));
         this.registerSetting(rotateOnFinish = new ButtonSetting("Rotate on finish", "结束后反向", false));
         this.registerSetting(pestCleaner = new ButtonSetting("Pest cleaner", "害虫清理", true));
         this.registerSetting(triggerAmount = new SliderSetting("Trigger amount", 4, 1, 8, 1, "触发数量"));
@@ -81,6 +98,7 @@ public class FarmingMacro extends Module {
 
     @Override
     public void guiUpdate() {
+        this.yaw.setVisibilityCondition(() -> face.getValue() == 4);
         this.triggerAmount.setVisibilityCondition(() -> pestCleaner.isToggled());
         this.rewarpOnly.setVisibilityCondition(() -> pestCleaner.isToggled());
     }
@@ -97,7 +115,9 @@ public class FarmingMacro extends Module {
     @Override
     public void onEnable() {
         running = false;
+        awaitingStart = false;
         state = State.IDLE;
+        if (ModuleManager.farmingProtector != null) ModuleManager.farmingProtector.resetRotationMonitor();
         releaseAll();
     }
 
@@ -123,19 +143,27 @@ public class FarmingMacro extends Module {
             return;
         }
         mc.player.getInventory().setSelectedSlot(hoeSlot);
+        FarmingStats.reset();
+        if (ModuleManager.farmingProtector != null) ModuleManager.farmingProtector.resetRotationMonitor();
 
         FarmingProtector.stopped = false;
         lapCount = 0;
         targetIndex = Math.min(startIndex + 1, waypoints.size() - 1);
         dwellTicks = 0;
+        dwellDurationTicks = 1;
+        stalledMoveTicks = 0;
+        previousRemaining = Double.POSITIVE_INFINITY;
+        recoveringWaypoint = false;
         turnTicks = 0;
         preWarpTicks = 0;
         warpCooldown = 0;
         warpTimeout = 0;
         preWarpPos = null;
         activeKey = null;
-        awaitingGrab = true;
+        awaitingStart = true;
         pestCleanCompletedLap = false;
+        pendingResume = false;
+        pendingResumeTick = 0;
 
         releaseAll();
         prepareMouseForMacroStart();
@@ -147,23 +175,54 @@ public class FarmingMacro extends Module {
     }
 
     public void stopMacro() {
+        boolean wasControllingMouse = running || awaitingStart;
+        FarmingStats.freezeSession();
         running = false;
+        awaitingStart = false;
         state = State.IDLE;
+        if (ModuleManager.farmingProtector != null) ModuleManager.farmingProtector.resetRotationMonitor();
         activeKey = null;
         dwellTicks = 0;
+        dwellDurationTicks = 1;
+        stalledMoveTicks = 0;
+        previousRemaining = Double.POSITIVE_INFINITY;
+        recoveringWaypoint = false;
         preWarpTicks = 0;
         warpCooldown = 0;
         preWarpPos = null;
+        pendingResume = false;
+        pendingResumeTick = 0;
         releaseAll();
+        if (wasControllingMouse
+                && mc.screen == null
+                && mc.getWindow().isFocused()
+                && (ModuleManager.ungrabMouse == null || !ModuleManager.ungrabMouse.isEnabled())) {
+            mc.mouseHandler.grabMouse();
+        }
+    }
+
+    public boolean isControllingMouse() {
+        return isEnabled() && (running || awaitingStart);
+    }
+
+    public boolean isFarmingState() {
+        return isEnabled() && running && !pestPaused && !pendingResume
+                && mc.screen == null
+                && (state == State.TURNING || state == State.MOVING || state == State.DWELLING);
     }
 
     @EventHandler
     public void onPreUpdate(PreUpdateEvent event) {
         if (!Utils.nullCheck()) return;
 
-        if (awaitingGrab) {
-            if (mc.mouseHandler.isMouseGrabbed()) {
-                awaitingGrab = false;
+        FarmingProtector protector = ModuleManager.farmingProtector;
+        if (protector != null) protector.beforeMacroRotation(this);
+
+        if (running || awaitingStart) FarmingStats.tick(mc, isFarmingState());
+
+        if (awaitingStart) {
+            if (mc.screen == null) {
+                awaitingStart = false;
                 running = true;
                 beginTurning();
             }
@@ -172,13 +231,12 @@ public class FarmingMacro extends Module {
         if (!running) {
             return;
         }
-        if (!mc.mouseHandler.isMouseGrabbed()) {
-            if (mc.screen == null) {
-                prepareMouseForMacroStart();
-                setKeyPressed(mc.options.keyAttack, true);
-            } else {
-                setKeyPressed(mc.options.keyAttack, false);
-            }
+        if (mc.mouseHandler.isMouseGrabbed()) {
+            mc.mouseHandler.releaseMouse();
+        }
+        if (mc.screen != null) {
+            releaseAll();
+            return;
         }
         if (pestPaused) {
             releaseAll();
@@ -206,9 +264,11 @@ public class FarmingMacro extends Module {
             return;
         }
 
-        if (!mc.options.keyAttack.isDown()) {
-            setKeyPressed(mc.options.keyAttack, true);
+        boolean farming = state == State.TURNING || state == State.MOVING || state == State.DWELLING;
+        if (farming && ((MinecraftAccessor) mc).frosty$getMissTime() == 10000) {
+            ((MinecraftAccessor) mc).frosty$setMissTime(0);
         }
+        setKeyPressed(mc.options.keyAttack, farming);
 
         int slot = findHoeSlot();
         if (slot != -1) {
@@ -225,6 +285,8 @@ public class FarmingMacro extends Module {
             default -> {
             }
         }
+
+        if (protector != null) protector.afterMacroRotation(this);
 
         if (pestCleaner.isToggled() && running && !pestPaused && !rewarpOnly.isToggled()) {
             checkPestTrigger();
@@ -268,6 +330,9 @@ public class FarmingMacro extends Module {
         }
 
         activeKey = null;
+        stalledMoveTicks = 0;
+        previousRemaining = Double.POSITIVE_INFINITY;
+        recoveringWaypoint = false;
         state = State.MOVING;
     }
 
@@ -282,37 +347,42 @@ public class FarmingMacro extends Module {
         double[] target = waypoints.get(targetIndex);
         Vec3 pos = mc.player.position();
 
-        boolean arrivedX = Math.abs(pos.x - target[0]) < ARRIVAL_XZ;
-        boolean arrivedZ = Math.abs(pos.z - target[2]) < ARRIVAL_XZ;
+        double[] from = waypoints.get(targetIndex - 1);
+        boolean routeAlongX = Math.abs(target[0] - from[0]) >= Math.abs(target[2] - from[2]);
+        double direction = Math.signum(routeAlongX ? target[0] - from[0] : target[2] - from[2]);
+        double remaining = direction * ((routeAlongX ? target[0] - pos.x : target[2] - pos.z));
+        double crossError = routeAlongX ? target[2] - pos.z : target[0] - pos.x;
 
-        if (arrivedX && arrivedZ) {
+        // Crossing the target plane counts as arrival, even if one tick overshoots it.
+        boolean nearTargetPlane = remaining <= ARRIVAL_XZ && remaining >= -MAX_GATE_OVERSHOOT;
+        if (nearTargetPlane && Math.abs(crossError) <= ROUTE_CORRIDOR) {
             releaseKeys();
             dwellTicks = 0;
+            dwellDurationTicks = randomStopTicks();
             state = State.DWELLING;
             return;
         }
 
-        double[] from = waypoints.get(targetIndex - 1);
-        KeyMapping current = moveKeyFor(from, target);
-        if (current == null) {
-            releaseKeys();
+        stalledMoveTicks = remaining < previousRemaining - 0.005 ? 0 : stalledMoveTicks + 1;
+        previousRemaining = remaining;
+        if (Math.abs(crossError) > ROUTE_CORRIDOR || remaining < -ARRIVAL_XZ
+                || stalledMoveTicks >= STALLED_MOVE_TICKS) recoveringWaypoint = true;
+        if (recoveringWaypoint && Math.abs(crossError) < RECOVERY_EXIT_CORRIDOR
+                && remaining > ARRIVAL_XZ && stalledMoveTicks == 0) recoveringWaypoint = false;
+
+        if (recoveringWaypoint) {
+            steerToward(target, pos, routeAlongX);
         } else {
-            pressOnly(current);
+            KeyMapping current = moveKeyFor(from, target);
+            if (current == null) releaseKeys();
+            else pressOnly(current);
         }
     }
 
     private void tickDwelling() {
-        if (targetIndex - 1 >= 0 && targetIndex < waypoints.size()) {
-            double[] from = waypoints.get(targetIndex - 1);
-            double[] to = waypoints.get(targetIndex);
-            KeyMapping cur = moveKeyFor(from, to);
-            if (cur != null) setKeyPressed(cur, true);
-        } else if (activeKey != null) {
-            setKeyPressed(activeKey, true);
-        }
-
+        releaseKeys();
         dwellTicks++;
-        if (dwellTicks >= msToTicks((int) stopTime.getInput())) {
+        if (dwellTicks >= dwellDurationTicks) {
             releaseKeys();
             targetIndex++;
             dwellTicks = 0;
@@ -480,6 +550,10 @@ public class FarmingMacro extends Module {
 
     private float faceYaw() {
         int faceIdx = (int) face.getValue();
+        if (faceIdx == 4) {
+            float customYaw = (float) yaw.getInput();
+            return Mth.wrapDegrees(customYaw + (rotateOnFinish.isToggled() && (lapCount % 2 == 1) ? 180f : 0f));
+        }
         if (rotateOnFinish.isToggled() && (lapCount % 2 == 1)) {
             faceIdx = oppositeCardinalIdx(faceIdx);
         }
@@ -525,11 +599,60 @@ public class FarmingMacro extends Module {
         return null;
     }
 
+    private void steerToward(double[] target, Vec3 pos, boolean routeAlongX) {
+        double dx = Mth.clamp(target[0] - pos.x, -2.0, 2.0);
+        double dz = Mth.clamp(target[2] - pos.z, -2.0, 2.0);
+        if (routeAlongX) dz *= 2.0;
+        else dx *= 2.0;
+        double yawRadians = Math.toRadians(mc.player.getYRot());
+        double forwardX = -Math.sin(yawRadians);
+        double forwardZ = Math.cos(yawRadians);
+        double rightX = -Math.cos(yawRadians);
+        double rightZ = -Math.sin(yawRadians);
+        int bestForward = 0;
+        int bestStrafe = 0;
+        double bestScore = -Double.MAX_VALUE;
+
+        // Recovery uses the actual yaw, so diagonal Custom angles can still reach the recorded point.
+        for (int forward = -1; forward <= 1; forward++) {
+            for (int strafe = -1; strafe <= 1; strafe++) {
+                if (forward == 0 && strafe == 0) continue;
+                double vx = forward * forwardX + strafe * rightX;
+                double vz = forward * forwardZ + strafe * rightZ;
+                double score = (vx * dx + vz * dz) / Math.hypot(vx, vz);
+                if (score > bestScore) {
+                    bestScore = score;
+                    bestForward = forward;
+                    bestStrafe = strafe;
+                }
+            }
+        }
+
+        setKeyPressed(mc.options.keyUp, bestForward > 0);
+        setKeyPressed(mc.options.keyDown, bestForward < 0);
+        setKeyPressed(mc.options.keyLeft, bestStrafe < 0);
+        setKeyPressed(mc.options.keyRight, bestStrafe > 0);
+    }
+
     private void pressOnly(KeyMapping key) {
-        setKeyPressed(mc.options.keyUp, key == mc.options.keyUp);
-        setKeyPressed(mc.options.keyDown, key == mc.options.keyDown);
+        pressMovementKeys(key);
+    }
+
+    private void pressMovementKeys(KeyMapping key) {
+        int held = (int) hold.getValue();
+        // An opposite hold would cancel the waypoint key and stall the macro.
+        setKeyPressed(mc.options.keyUp, key == mc.options.keyUp || (held == 1 && key != mc.options.keyDown));
+        setKeyPressed(mc.options.keyDown, key == mc.options.keyDown || (held == 2 && key != mc.options.keyUp));
         setKeyPressed(mc.options.keyLeft, key == mc.options.keyLeft);
         setKeyPressed(mc.options.keyRight, key == mc.options.keyRight);
+    }
+
+    private int randomStopTicks() {
+        int minMs = (int) Math.round(Math.min(stopTime.getInputMin(), stopTime.getInputMax()));
+        int maxMs = (int) Math.round(Math.max(stopTime.getInputMin(), stopTime.getInputMax()));
+        int minTicks = msToTicks(minMs);
+        int maxTicks = msToTicks(maxMs);
+        return ThreadLocalRandom.current().nextInt(minTicks, maxTicks + 1);
     }
 
     private void releaseKeys() {
@@ -550,19 +673,12 @@ public class FarmingMacro extends Module {
     }
 
     private void prepareMouseForMacroStart() {
-        if (mc.screen != null) return;
-
-        boolean restoreUngrab = ModuleManager.ungrabMouse != null && ModuleManager.ungrabMouse.isEnabled();
-        if (restoreUngrab) {
-            ModuleManager.ungrabMouse.disable();
-        }
-
-        if (!mc.mouseHandler.isMouseGrabbed()) {
-            mc.mouseHandler.grabMouse();
-        }
-
-        if (restoreUngrab) {
-            ModuleManager.ungrabMouse.enable();
+        mc.mouseHandler.releaseMouse();
+        GLFW.glfwSetInputMode(mc.getWindow().handle(), GLFW.GLFW_CURSOR, GLFW.GLFW_CURSOR_NORMAL);
+        if (mc.screen == null) {
+            awaitingStart = false;
+            running = true;
+            beginTurning();
         }
     }
 

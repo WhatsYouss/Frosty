@@ -31,13 +31,15 @@ void main() {
     vec2 center = Rect.xy + Rect.zw * 0.5;
     vec3 shape = roundedBox(coord - center, Rect.zw * 0.5, Radius);
     float distance = shape.x;
-    vec2 normal = normalize(shape.yz);
-    float shadow = exp(-abs(distance) / max(Effects.y, 0.01)) * Effects.z;
     if (distance > 0.0) {
-        fragColor = vec4(mix(base, vec3(0.0), shadow * 0.18), 1.0);
+        // Fade before the 32 px composite scissor so its rectangular edge is invisible.
+        float shadow = exp(-distance / max(Effects.y, 0.01)) * Effects.z;
+        float shadowFade = 1.0 - smoothstep(24.0, 32.0, distance);
+        fragColor = vec4(mix(base, vec3(0.0), shadow * shadowFade * 0.18), 1.0);
         return;
     }
 
+    vec2 normal = normalize(shape.yz);
     float depth = -distance;
     float thickness = Optics0.x;
     float incident = asin(pow(clamp(1.0 - depth / thickness, 0.0, 1.0), 2.0));

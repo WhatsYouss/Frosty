@@ -1,5 +1,6 @@
 package xyz.whatsyouss.frosty.mixin;
 
+import com.llamalad7.mixinextras.injector.ModifyExpressionValue;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.player.LocalPlayer;
@@ -36,6 +37,52 @@ public abstract class MinecraftMixin {
 
     @Unique
     private boolean frosty$skyblockUpdateChecked;
+
+    /**
+     * Keep vanilla's held-attack path available while a module owns the
+     * released cursor. The screen and attack-key checks remain in vanilla.
+     */
+    @ModifyExpressionValue(
+            method = "handleKeybinds",
+            at = @At(
+                    value = "INVOKE",
+                    target = "Lnet/minecraft/client/MouseHandler;isMouseGrabbed()Z"
+            )
+    )
+    private boolean frosty$allowHeldAttackWhileUngrabbed(boolean mouseGrabbed) {
+        Minecraft minecraft = (Minecraft) (Object) this;
+        return mouseGrabbed
+                || (frosty$allowsBackgroundInput() && minecraft.options.keyAttack.isDown());
+    }
+
+    /** Keep ticking without opening the pause screen during background input. */
+    @ModifyExpressionValue(
+            method = "pauseIfInactive",
+            at = @At(
+                    value = "INVOKE",
+                    target = "Lcom/mojang/blaze3d/platform/Window;isFocused()Z"
+            )
+    )
+    private boolean frosty$keepRunningWhileUnfocused(boolean focused) {
+        return focused || frosty$allowsBackgroundInput();
+    }
+
+    @Unique
+    private boolean frosty$allowsBackgroundInput() {
+        return level != null
+                && player != null
+                && ((ModuleManager.ungrabMouse != null && ModuleManager.ungrabMouse.isEnabled())
+                || (ModuleManager.farmingMacro != null && ModuleManager.farmingMacro.isControllingMouse()));
+    }
+
+    /** Start the tracker capture only when Minecraft actually performs the vacuum's attack swing. */
+    @Inject(method = "startAttack", at = @At(value = "INVOKE",
+            target = "Lnet/minecraft/client/player/LocalPlayer;swing(Lnet/minecraft/world/InteractionHand;)V"))
+    private void frosty$beginPestTrackerOnAttack(CallbackInfoReturnable<Boolean> cir) {
+        if (ModuleManager.pestCleaner != null && ModuleManager.pestCleaner.isEnabled()) {
+            ModuleManager.pestCleaner.onTrackerAttack();
+        }
+    }
 
     @Inject(method = "<init>", at = @At("TAIL"))
     private void onInit(CallbackInfo info) {

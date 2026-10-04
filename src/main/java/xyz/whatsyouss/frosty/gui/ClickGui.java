@@ -19,7 +19,6 @@ import xyz.whatsyouss.frosty.modules.Module;
 import xyz.whatsyouss.frosty.modules.ModuleManager;
 import xyz.whatsyouss.frosty.modules.impl.client.UI;
 
-import java.awt.*;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -40,6 +39,19 @@ public class ClickGui extends Screen {
     private InputComponent focusedInput;
     private float scrollOffset = 0f;
     private float totalModuleHeight = 0f;
+    private float lastLayoutX = Float.NaN;
+    private float lastLayoutY = Float.NaN;
+    private float lastLayoutScroll = Float.NaN;
+    private boolean layoutDirty = true;
+    private static final int LIGHT_BG = 0xFFFAFAFA;
+    private static final int DARK_BG = 0xFF323232;
+    private static final int LIGHT_HEADER = 0xFF6464FF;
+    private static final int DARK_HEADER = 0xFF3C3CB4;
+    private static final int LIGHT_SIDEBAR = 0xFFE6E6E6;
+    private static final int DARK_SIDEBAR = 0xFF464646;
+    private static final int LIGHT_BODY = 0xFFF0F0F0;
+    private static final int DARK_BODY = 0xFF3C3C3C;
+    private static final String TITLE_TEXT = "Frosty " + Frosty.MOD_VERSION;
 
     public ClickGui() {
         super(Component.literal("Frosty"));
@@ -81,18 +93,57 @@ public class ClickGui extends Screen {
         }
 
         moduleComponents.clear();
-        float moduleY = y + 25;
-        totalModuleHeight = 0;
-
         for (Module module : ModuleManager.getModulesByCategory(selectedCategory)) {
-            ModuleComponent component = new ModuleComponent(module, x + 75, moduleY, width - 80, 15);
+            ModuleComponent component = new ModuleComponent(module, x + 75, y + 25, width - 80, 15);
             component.setExpanded(moduleExpandedStates.getOrDefault(module.getName(), false));
             moduleComponents.add(component);
-            totalModuleHeight += component.getExpandedTotalHeight();
         }
+        layoutDirty = true;
+        layoutModuleComponents();
+    }
 
-        float maxScroll = Math.max(0, totalModuleHeight - (height - 30));
-        scrollOffset = Mth.clamp(scrollOffset, 0, maxScroll);
+    private void layoutModuleComponents() {
+        if (!layoutDirty && x == lastLayoutX && y == lastLayoutY && scrollOffset == lastLayoutScroll) {
+            boolean changed = false;
+            for (ModuleComponent component : moduleComponents) {
+                if (component.needsLayout()) {
+                    changed = true;
+                    break;
+                }
+            }
+            if (!changed) return;
+        }
+        float totalHeight = 0;
+        for (ModuleComponent component : moduleComponents) {
+            component.layout(x + 75, y + 25 + totalHeight - scrollOffset);
+            totalHeight += component.getTotalHeight();
+        }
+        // An open dropdown may extend past the final row and needs scroll room.
+        float dropdownExtra = 0;
+        for (ModuleComponent component : moduleComponents) {
+            if (component.isExpanded()) {
+                for (xyz.whatsyouss.frosty.gui.component.Component setting : component.getSettingComponents()) {
+                    if (setting.isVisible() && setting instanceof SelectComponent select && select.isExpanded()) {
+                        dropdownExtra = Math.max(dropdownExtra,
+                                setting.getY() + setting.getHeight() * (select.getOptionsLength() + 1)
+                                        - (y + 25 - scrollOffset + totalHeight));
+                    }
+                }
+            }
+        }
+        totalModuleHeight = totalHeight + Math.max(0, dropdownExtra);
+        float clamped = Mth.clamp(scrollOffset, 0, Math.max(0, totalModuleHeight - (height - 30)));
+        if (clamped != scrollOffset) {
+            float delta = scrollOffset - clamped;
+            scrollOffset = clamped;
+            for (ModuleComponent component : moduleComponents) {
+                component.layout(component.getX(), component.getY() + delta);
+            }
+        }
+        lastLayoutX = x;
+        lastLayoutY = y;
+        lastLayoutScroll = scrollOffset;
+        layoutDirty = false;
     }
 
     public void setFocusedInput(InputComponent input) {
@@ -111,109 +162,89 @@ public class ClickGui extends Screen {
 
     @Override
     public void extractRenderState(GuiGraphicsExtractor context, int mouseX, int mouseY, float delta) {
-        float scale = 1.0f;
+        layoutModuleComponents();
         boolean isLight = UI.clickGuiColor.getValue() == 0;
 
         if (LiquidGlassStyle.isEnabled()) {
             LiquidGlassStyle.drawPanel(context, x, y, width, height);
             LiquidGlassStyle.drawHeader(context, x, y, width, 20);
-            LiquidGlassStyle.drawControl(context, x + 5, y + 25, 60, height - 30, false, false);
-            LiquidGlassStyle.drawControl(context, x + 75, y + 25, width - 80, height - 30, false, false);
+            LiquidGlassStyle.drawInsetBackground(context, x + 5, y + 25, 60, height - 30,
+                    !categoryComponents.isEmpty());
+            LiquidGlassStyle.drawInsetBackground(context, x + 75, y + 25, width - 80, height - 30,
+                    !moduleComponents.isEmpty());
         } else {
-            context.fill((int) (x / scale), (int) (y / scale), (int) ((x + width) / scale), (int) ((y + height) / scale),
-                    isLight ? new Color(250, 250, 250).getRGB() : new Color(50, 50, 50).getRGB());
-            context.fill((int) (x / scale), (int) (y / scale), (int) ((x + width) / scale), (int) ((y + 20) / scale),
-                    isLight ? new Color(100, 100, 255).getRGB() : new Color(60, 60, 180).getRGB());
-            context.fill((int) ((x + 5) / scale), (int) ((y + 25) / scale), (int) ((x + 65) / scale), (int) ((y + height - 5) / scale),
-                    isLight ? new Color(230, 230, 230).getRGB() : new Color(70, 70, 70).getRGB());
-            context.fill((int) ((x + 75) / scale), (int) ((y + 25) / scale), (int) ((x + width - 5) / scale), (int) ((y + height - 5) / scale),
-                    isLight ? new Color(240, 240, 240).getRGB() : new Color(60, 60, 60).getRGB());
+            context.fill((int) x, (int) y, (int) (x + width), (int) (y + height), isLight ? LIGHT_BG : DARK_BG);
+            context.fill((int) x, (int) y, (int) (x + width), (int) (y + 20), isLight ? LIGHT_HEADER : DARK_HEADER);
+            context.fill((int) (x + 5), (int) (y + 25), (int) (x + 65), (int) (y + height - 5), isLight ? LIGHT_SIDEBAR : DARK_SIDEBAR);
+            context.fill((int) (x + 75), (int) (y + 25), (int) (x + width - 5), (int) (y + height - 5), isLight ? LIGHT_BODY : DARK_BODY);
         }
 
-        String version = Frosty.MOD_VERSION;
-        context.text(this.font, "Frosty " + version, (int) ((x + width / 2) / scale), (int) ((y + 6) / scale), Color.WHITE.getRGB());
+        context.text(this.font, TITLE_TEXT, (int) (x + width / 2), (int) (y + 6), 0xFFFFFFFF);
 
         for (CategoryComponent component : categoryComponents) {
             component.render(context, mouseX, mouseY, delta);
         }
 
-        int scissorY1 = (int) ((y + 25) / scale);
-        int scissorY2 = (int) ((y + height - 5) / scale);
-        context.enableScissor((int) (x / scale), scissorY1, (int) ((x + width) / scale), scissorY2);
+        int scissorY1 = (int) (y + 25);
+        int scissorY2 = (int) (y + height - 5);
+        context.enableScissor((int) x, scissorY1, (int) (x + width), scissorY2);
 
-        float moduleY = y + 25 - scrollOffset;
         float renderBottom = y + height - 5;
-        Map<ModuleComponent, Boolean> showDescriptions = new HashMap<>();
+        ModuleComponent hoveredDescription = null;
 
         for (ModuleComponent component : moduleComponents) {
-            if (moduleY < y + height - 5 && moduleY + component.getTotalHeight() > y + 25) {
-                component.updatePosition(x + 75, moduleY);
+            if (component.getY() < renderBottom && component.getY() + component.getTotalHeight() > y + 25) {
+                component.render(context, mouseX, mouseY, delta);
                 if (component.isExpanded()) {
-                    float currentY = moduleY + component.getHeight() + 5;
                     for (xyz.whatsyouss.frosty.gui.component.Component settingComponent : component.getSettingComponents()) {
-                        if (settingComponent.isVisible()) {
-                            if (currentY < y + height - 5 && currentY + settingComponent.getHeight() > y + 25) {
-                                settingComponent.updatePosition(x + 80, currentY);
-                                if (!(settingComponent instanceof SelectComponent && ((SelectComponent) settingComponent).isExpanded())) {
-                                    settingComponent.render(context, mouseX, mouseY, delta);
-                                }
-                            }
-                            currentY += settingComponent.getHeight() + 2;
+                        if (settingComponent.isVisible() && settingComponent.getY() < renderBottom
+                                && settingComponent.getY() + settingComponent.getHeight() > y + 25) {
+                            component.renderSettingBackground(context, settingComponent);
+                            settingComponent.render(context, mouseX, mouseY, delta);
                         }
                     }
                 }
-                component.render(context, mouseX, mouseY, delta);
-                boolean showDescription = !component.getModule().getDesc().isEmpty() &&
+                if (!component.getModule().getDesc().isEmpty() &&
                         mouseX >= component.getX() + component.getWidth() - 25 && mouseX <= component.getX() + component.getWidth() - 5 &&
-                        mouseY >= component.getY() + 2 && mouseY <= component.getY() + component.getHeight() - 2;
-                showDescriptions.put(component, showDescription);
+                        mouseY >= component.getY() + 2 && mouseY <= component.getY() + component.getHeight() - 2) {
+                    hoveredDescription = component;
+                }
             }
-            moduleY += component.getTotalHeight();
         }
 
-        moduleY = y + 25 - scrollOffset;
         for (ModuleComponent component : moduleComponents) {
-            if (component.isExpanded() && moduleY < y + height - 5 && moduleY + component.getTotalHeight() > y + 25) {
-                float currentY = moduleY + component.getHeight() + 5;
+            if (component.isExpanded() && component.getY() < renderBottom && component.getY() + component.getTotalHeight() > y + 25) {
                 for (xyz.whatsyouss.frosty.gui.component.Component settingComponent : component.getSettingComponents()) {
-                    if (settingComponent.isVisible() && settingComponent instanceof SelectComponent && ((SelectComponent) settingComponent).isExpanded() &&
-                            currentY < y + height - 5 && currentY + settingComponent.getHeight() > y + 25) {
-                        settingComponent.updatePosition(x + 80, currentY);
-                        settingComponent.render(context, mouseX, mouseY, delta);
-                    }
-                    if (settingComponent.isVisible()) {
-                        currentY += settingComponent.getHeight() + 2;
+                    if (settingComponent.isVisible() && settingComponent instanceof SelectComponent select && select.isExpanded()
+                            && settingComponent.getY() < renderBottom && settingComponent.getY() + settingComponent.getHeight() > y + 25) {
+                        select.renderDropdown(context, mouseX, mouseY);
                     }
                 }
             }
-            moduleY += component.getTotalHeight();
         }
 
         context.disableScissor();
 
-        moduleY = y + 25 - scrollOffset;
-        for (ModuleComponent component : moduleComponents) {
-            if (moduleY < y + height - 5 && moduleY + component.getTotalHeight() > y + 25 && showDescriptions.getOrDefault(component, false)) {
+        if (hoveredDescription != null) {
+            ModuleComponent component = hoveredDescription;
                 int descWidth = 200;
                 int descX = (int) (component.getX() + component.getWidth() / 2);
                 int descY = (int) (component.getY() + component.getHeight() + 5);
 
-                List<FormattedCharSequence> wrappedText = this.font.split(Component.literal(component.getModule().getDesc()), descWidth - 10);
+                List<FormattedCharSequence> wrappedText = component.descriptionLines(this.font);
                 int descHeight = wrappedText.size() * 10 + 10;
 
                 if (LiquidGlassStyle.isEnabled()) {
-                    LiquidGlassStyle.drawGlass(context, descX, descY, descWidth, descHeight, 6,
+                    LiquidGlassStyle.drawGlass(context, descX, descY, descWidth, descHeight, 10,
                             isLight ? 0xD8678CFF : 0xD22A4A95);
                 } else {
                     context.fill(descX, descY, descX + descWidth, descY + descHeight,
-                            isLight ? new Color(100, 100, 255).getRGB() : new Color(60, 60, 180).getRGB());
+                            isLight ? LIGHT_HEADER : DARK_HEADER);
                 }
 
                 for (int i = 0; i < wrappedText.size(); i++) {
-                    context.text(this.font, wrappedText.get(i), descX + 5, descY + 5 + (i * 10), Color.WHITE.getRGB());
+                    context.text(this.font, wrappedText.get(i), descX + 5, descY + 5 + (i * 10), 0xFFFFFFFF);
                 }
-            }
-            moduleY += component.getTotalHeight();
         }
     }
 
@@ -222,13 +253,14 @@ public class ClickGui extends Screen {
         if (mouseX >= x + 75 && mouseX <= x + width - 5 &&
                 mouseY >= y + 25 && mouseY <= y + height - 5) {
 
-            updateModuleComponents();
+            layoutModuleComponents();
 
             float scrollSpeed = 15f;
             scrollOffset -= verticalAmount * scrollSpeed;
 
             float maxScroll = Math.max(0, totalModuleHeight - (height - 30));
             scrollOffset = Mth.clamp(scrollOffset, 0, maxScroll);
+            layoutModuleComponents();
 
             return true;
         }
@@ -237,6 +269,7 @@ public class ClickGui extends Screen {
 
     @Override
     public boolean mouseClicked(MouseButtonEvent click, boolean doubled) {
+        layoutModuleComponents();
         double mouseX = click.x();
         double mouseY = click.y();
         int button = click.button();
@@ -252,7 +285,6 @@ public class ClickGui extends Screen {
             return true;
         }
 
-        boolean selectClicked = false;
         float currentModuleY = y + 25 - scrollOffset;
         float renderBottom = y + height - 5;
 
@@ -277,6 +309,7 @@ public class ClickGui extends Screen {
                                 mouseY >= clickTop && mouseY <= clickBottom) {
                             component.mouseClicked(mouseX, mouseY, button);
                             if (((SelectComponent) component).isClickConsumed()) {
+                                layoutModuleComponents();
                                 return true;
                             }
                         }
@@ -289,7 +322,7 @@ public class ClickGui extends Screen {
             currentModuleY += moduleComponent.getTotalHeight();
         }
 
-        if (!selectClicked) {
+        {
             float moduleY = y + 25 - scrollOffset;
             for (ModuleComponent moduleComponent : moduleComponents) {
                 if (moduleComponent.isExpanded() && moduleY < renderBottom && moduleY + moduleComponent.getTotalHeight() > y + 25) {
@@ -341,11 +374,7 @@ public class ClickGui extends Screen {
                 float clickBottom = Math.min(currentModuleY + component.getTotalHeight(), renderBottom);
                 if (mouseY >= clickTop && mouseY <= clickBottom) {
                     component.mouseClicked(mouseX, mouseY, button);
-                    for (xyz.whatsyouss.frosty.gui.component.Component settingComponent : moduleComponents) {
-                        if (settingComponent instanceof InputComponent) {
-                            ((InputComponent) settingComponent).setFocused(false);
-                        }
-                    }
+                    layoutModuleComponents();
                     clearFocusedInput();
                     return true;
                 }
@@ -390,7 +419,7 @@ public class ClickGui extends Screen {
                 categoryY += 20;
             }
 
-            updateModuleComponents();
+            layoutModuleComponents();
             return true;
         }
 

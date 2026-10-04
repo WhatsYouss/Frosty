@@ -6,11 +6,13 @@ import xyz.whatsyouss.frosty.modules.impl.combat.KillAura;
 import xyz.whatsyouss.frosty.modules.impl.combat.Velocity;
 import xyz.whatsyouss.frosty.modules.impl.farming.*;
 import xyz.whatsyouss.frosty.modules.impl.fishing.AutoFish;
+import xyz.whatsyouss.frosty.modules.impl.fishing.WormLavaESP;
 import xyz.whatsyouss.frosty.modules.impl.foraging.LushlilacNuker;
 import xyz.whatsyouss.frosty.modules.impl.foraging.SeaLumiesNuker;
 import xyz.whatsyouss.frosty.modules.impl.foraging.WoodNuker;
 import xyz.whatsyouss.frosty.modules.impl.fun.*;
 import xyz.whatsyouss.frosty.modules.impl.hunting.AutoReel;
+import xyz.whatsyouss.frosty.modules.impl.hunting.AxolotlESP;
 import xyz.whatsyouss.frosty.modules.impl.hunting.Hideonleaf;
 import xyz.whatsyouss.frosty.modules.impl.mining.*;
 import xyz.whatsyouss.frosty.modules.impl.movement.Eagle;
@@ -89,7 +91,7 @@ public class ModuleManager {
     public static PestCleaner pestCleaner;
     public static Spammer spammer;
     public static Fly fly;
-    public static Derp derp;
+    public static Spin spin;
     public static ChatCopier chatCopier;
     public static Eagle eagle;
     public static Blink blink;
@@ -103,6 +105,7 @@ public class ModuleManager {
     public static AntiTexture antiTexture;
     public static Xray xray;
     public static WormLavaESP wormLavaESP;
+    public static FarmingInfo farmingInfo;
 
     public void register() {
         this.addModule(tps = new TPS());
@@ -165,7 +168,7 @@ public class ModuleManager {
         this.addModule(pestESP = new PestESP());
         this.addModule(spammer = new Spammer());
         this.addModule(fly = new Fly());
-        this.addModule(derp = new Derp());
+        this.addModule(spin = new Spin());
         this.addModule(chatCopier = new ChatCopier());
         this.addModule(eagle = new Eagle());
         this.addModule(blink = new Blink());
@@ -178,6 +181,7 @@ public class ModuleManager {
         this.addModule(antiTexture = new AntiTexture());
         this.addModule(xray = new Xray());
         this.addModule(wormLavaESP = new WormLavaESP());
+        this.addModule(farmingInfo = new FarmingInfo());
         modules.sort(Comparator.comparing(Module::getName));
     }
 

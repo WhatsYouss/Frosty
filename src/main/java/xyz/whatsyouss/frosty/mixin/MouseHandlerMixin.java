@@ -51,14 +51,16 @@ public abstract class MouseHandlerMixin {
 
     @Inject(method = "grabMouse", at = @At("HEAD"), cancellable = true)
     private void onLockCursor(CallbackInfo ci) {
-        if (ModuleManager.ungrabMouse != null && ModuleManager.ungrabMouse.isEnabled()) {
+        if ((ModuleManager.ungrabMouse != null && ModuleManager.ungrabMouse.isEnabled())
+                || (ModuleManager.farmingMacro != null && ModuleManager.farmingMacro.isControllingMouse())) {
             ci.cancel();
         }
     }
 
     @Inject(method = "turnPlayer", at = @At("HEAD"), cancellable = true)
     private void onUpdateMouse(CallbackInfo ci) {
-        if (ModuleManager.ungrabMouse != null && ModuleManager.ungrabMouse.isEnabled()) {
+        if ((ModuleManager.ungrabMouse != null && ModuleManager.ungrabMouse.isEnabled())
+                || (ModuleManager.farmingMacro != null && ModuleManager.farmingMacro.isControllingMouse())) {
             ci.cancel();
         }
     }

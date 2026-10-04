@@ -1,12 +1,9 @@
-package xyz.whatsyouss.frosty.modules.impl.render;
+package xyz.whatsyouss.frosty.modules.impl.farming;
 
 import meteordevelopment.orbit.EventHandler;
-import net.minecraft.client.multiplayer.PlayerInfo;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.monster.Silverfish;
 import net.minecraft.world.entity.ambient.Bat;
-import net.minecraft.world.phys.AABB;
-import xyz.whatsyouss.frosty.events.impl.PreUpdateEvent;
 import xyz.whatsyouss.frosty.events.impl.Render3DEvent;
 import xyz.whatsyouss.frosty.modules.Module;
 import xyz.whatsyouss.frosty.utility.RenderUtils;
@@ -17,7 +14,7 @@ import java.awt.*;
 public class PestESP extends Module {
 
     public PestESP() {
-        super("PestESP", "害虫透视", category.Render);
+        super("PestESP", "害虫透视", category.Farming);
     }
 
     @EventHandler

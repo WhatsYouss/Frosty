@@ -86,11 +86,75 @@ public class RenderUtils {
         int bottom = (int) (y + height);
         int roundedRadius = Math.max(0, Math.min((int) radius,
                 Math.min((right - left) / 2, (bottom - top) / 2)));
-
-        for (int row = top; row < bottom; row++) {
-            int inset = roundedInset(row - top, bottom - top, roundedRadius);
-            ctx.fill(left + inset, row, right - inset, row + 1, color);
+        if (right <= left || bottom <= top) return;
+        if (roundedRadius == 0) {
+            ctx.fill(left, top, right, bottom, color);
+            return;
         }
+        int rows = bottom - top;
+        int runStart = 0;
+        int runInset = roundedInset(0, rows, roundedRadius);
+        for (int row = 1; row <= rows; row++) {
+            int inset = row == rows ? -1 : roundedInset(row, rows, roundedRadius);
+            if (inset != runInset) {
+                ctx.fill(left + runInset, top + runStart, right - runInset, top + row, color);
+                runStart = row;
+                runInset = inset;
+            }
+        }
+    }
+
+    public static void drawTopRoundedRect(GuiGraphicsExtractor ctx,
+                                          float x, float y, float width, float height,
+                                          float radius, int color) {
+        int left = (int) x;
+        int top = (int) y;
+        int right = (int) (x + width);
+        int bottom = (int) (y + height);
+        if (right <= left || bottom <= top) return;
+        int roundedRadius = Math.max(0, Math.min((int) radius,
+                Math.min((right - left) / 2, bottom - top)));
+        int rows = bottom - top;
+        int runStart = 0;
+        int runInset = topRoundedInset(0, roundedRadius);
+        for (int row = 1; row <= rows; row++) {
+            int inset = row == rows ? -1 : topRoundedInset(row, roundedRadius);
+            if (inset != runInset) {
+                ctx.fill(left + runInset, top + runStart, right - runInset, top + row, color);
+                runStart = row;
+                runInset = inset;
+            }
+        }
+    }
+
+    public static void drawTopRoundedBorder(GuiGraphicsExtractor ctx,
+                                            float x, float y, float width, float height,
+                                            float radius, int color) {
+        int left = (int) x;
+        int top = (int) y;
+        int right = (int) (x + width);
+        int bottom = (int) (y + height);
+        if (right <= left || bottom <= top) return;
+        int roundedRadius = Math.max(0, Math.min((int) radius,
+                Math.min((right - left) / 2, bottom - top)));
+        int topInset = topRoundedInset(0, roundedRadius);
+        ctx.fill(left + topInset, top, right - topInset, top + 1, color);
+        if (bottom - top == 1) return;
+        int runStart = 1;
+        int runOuter = -1;
+        int runInner = -1;
+        for (int row = 1; row < bottom - top - 1; row++) {
+            int outer = topRoundedInset(row, roundedRadius);
+            int inner = topRoundedInset(row - 1, Math.max(0, roundedRadius - 1));
+            if (runOuter != outer || runInner != inner) {
+                if (runOuter >= 0) fillRoundedBorderRun(ctx, left, right, top + runStart, top + row, runOuter, runInner, color);
+                runStart = row;
+                runOuter = outer;
+                runInner = inner;
+            }
+        }
+        if (runOuter >= 0) fillRoundedBorderRun(ctx, left, right, top + runStart, bottom - 1, runOuter, runInner, color);
+        ctx.fill(left, bottom - 1, right, bottom, color);
     }
 
     public static void drawRoundedBorder(GuiGraphicsExtractor ctx,
@@ -103,22 +167,35 @@ public class RenderUtils {
         int roundedRadius = Math.max(0, Math.min((int) radius,
                 Math.min((right - left) / 2, (bottom - top) / 2)));
 
-        for (int row = top; row < bottom; row++) {
-            int outerInset = roundedInset(row - top, bottom - top, roundedRadius);
-            if (row == top || row == bottom - 1) {
-                ctx.fill(left + outerInset, row, right - outerInset, row + 1, color);
-                continue;
+        int rows = bottom - top;
+        if (right <= left || rows <= 0) return;
+        int topInset = roundedInset(0, rows, roundedRadius);
+        ctx.fill(left + topInset, top, right - topInset, top + 1, color);
+        if (rows == 1) return;
+        int runStart = 1;
+        int runOuter = -1;
+        int runInner = -1;
+        for (int row = 1; row < rows - 1; row++) {
+            int outer = roundedInset(row, rows, roundedRadius);
+            int inner = roundedInset(row - 1, rows - 2, Math.max(0, roundedRadius - 1));
+            if (runOuter != outer || runInner != inner) {
+                if (runOuter >= 0) fillRoundedBorderRun(ctx, left, right, top + runStart, top + row, runOuter, runInner, color);
+                runStart = row;
+                runOuter = outer;
+                runInner = inner;
             }
-
-            int innerInset = roundedInset(row - top - 1, bottom - top - 2,
-                    Math.max(0, roundedRadius - 1));
-            int outerLeft = left + outerInset;
-            int outerRight = right - outerInset;
-            int innerLeft = left + 1 + innerInset;
-            int innerRight = right - 1 - innerInset;
-            ctx.fill(outerLeft, row, Math.min(innerLeft, outerRight), row + 1, color);
-            ctx.fill(Math.max(innerRight, outerLeft), row, outerRight, row + 1, color);
         }
+        if (runOuter >= 0) fillRoundedBorderRun(ctx, left, right, top + runStart, bottom - 1, runOuter, runInner, color);
+        int bottomInset = roundedInset(rows - 1, rows, roundedRadius);
+        ctx.fill(left + bottomInset, bottom - 1, right - bottomInset, bottom, color);
+    }
+
+    private static void fillRoundedBorderRun(GuiGraphicsExtractor ctx, int left, int right,
+                                             int top, int bottom, int outerInset, int innerInset, int color) {
+        int outerLeft = left + outerInset;
+        int outerRight = right - outerInset;
+        ctx.fill(outerLeft, top, Math.min(left + 1 + innerInset, outerRight), bottom, color);
+        ctx.fill(Math.max(right - 1 - innerInset, outerLeft), top, outerRight, bottom, color);
     }
 
     private static int roundedInset(int row, int height, int radius) {
@@ -128,6 +205,13 @@ public class RenderUtils {
 
         float centerOffset = row < radius ? radius - row - 0.5f
                 : row - (height - radius) + 0.5f;
+        return Math.max(0, (int) Math.ceil(radius - Math.sqrt(radius * radius
+                - centerOffset * centerOffset)));
+    }
+
+    private static int topRoundedInset(int row, int radius) {
+        if (radius <= 0 || row >= radius) return 0;
+        float centerOffset = radius - row - 0.5f;
         return Math.max(0, (int) Math.ceil(radius - Math.sqrt(radius * radius
                 - centerOffset * centerOffset)));
     }

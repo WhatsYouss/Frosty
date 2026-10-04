@@ -30,10 +30,9 @@ public class InputComponent extends Component {
         boolean isLight = ModuleManager.ui.clickGuiColor.getValue() == 0;
         isHovered = mouseX >= x + width - 150 && mouseX <= x + width - 10 && mouseY >= y && mouseY <= y + height;
 
-        context.text(mc.font, setting.getTransName(), (int) (x + 2), (int) (y + height / 2 - 4), LiquidGlassStyle.isEnabled() ? LiquidGlassStyle.textColor() : isLight ? Color.BLACK.getRGB() : Color.WHITE.getRGB(), false);
+        context.text(mc.font, setting.getTransName(), (int) (x + 2), (int) (y + height / 2 - 4), LiquidGlassStyle.isEnabled() ? LiquidGlassStyle.textColor() : isLight ? 0xFF000000 : 0xFFFFFFFF, false);
 
-        int boxColor = focused ? new Color(200, 200, 255).getRGB() :
-                (isHovered ? new Color(200, 200, 200).getRGB() : new Color(180, 180, 180).getRGB());
+        int boxColor = focused ? 0xFFC8C8FF : (isHovered ? 0xFFC8C8C8 : 0xFFB4B4B4);
         if (LiquidGlassStyle.isEnabled()) {
             LiquidGlassStyle.drawControl(context, x + width - 150, y, 140, height,
                     focused, isHovered);
@@ -44,9 +43,9 @@ public class InputComponent extends Component {
         String displayText = setting.getValue();
         if (displayText.isEmpty() && !focused) {
             displayText = setting.getPlaceholder();
-            context.text(mc.font, net.minecraft.network.chat.Component.literal(displayText), (int) (x + width - 145), (int) (y + height / 2 - 4), LiquidGlassStyle.isEnabled() ? LiquidGlassStyle.mutedTextColor() : Color.GRAY.getRGB(), false);
+            context.text(mc.font, displayText, (int) (x + width - 145), (int) (y + height / 2 - 4), LiquidGlassStyle.isEnabled() ? LiquidGlassStyle.mutedTextColor() : 0xFF808080, false);
         } else {
-            context.text(mc.font, net.minecraft.network.chat.Component.literal(displayText + (focused ? "_" : "")), (int) (x + width - 145), (int) (y + height / 2 - 4), LiquidGlassStyle.isEnabled() ? LiquidGlassStyle.textColor() : isLight ? Color.BLACK.getRGB() : Color.WHITE.getRGB(), false);
+            context.text(mc.font, displayText + (focused ? "_" : ""), (int) (x + width - 145), (int) (y + height / 2 - 4), LiquidGlassStyle.isEnabled() ? LiquidGlassStyle.textColor() : isLight ? 0xFF000000 : 0xFFFFFFFF, false);
         }
     }
 

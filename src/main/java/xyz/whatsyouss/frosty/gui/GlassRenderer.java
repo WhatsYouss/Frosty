@@ -28,7 +28,9 @@ import xyz.whatsyouss.frosty.modules.impl.client.UI;
 
 public final class GlassRenderer {
     private static final int BLUR_RADIUS = 18;
+    private static final int SHADOW_MARGIN = 32;
     private static final int MAX_RADIUS = 64;
+    private static final float[] BLUR_WEIGHTS = gaussian(BLUR_RADIUS);
     private static final int BUFFER_USAGE = GpuBuffer.USAGE_UNIFORM | GpuBuffer.USAGE_MAP_WRITE;
     private static final Identifier GLASS_VERTEX = Identifier.parse("frosty:blit_fullscreen");
     private static final Identifier GLASS_FRAGMENT = Identifier.parse("frosty:liquid_glass");
@@ -47,6 +49,10 @@ public final class GlassRenderer {
     private static GpuTextureView blurTempView;
     private static GpuTexture blurred;
     private static GpuTextureView blurredView;
+    private static int physicalPanelX;
+    private static int physicalPanelY;
+    private static int physicalPanelWidth;
+    private static int physicalPanelHeight;
 
     private GlassRenderer() {
     }
@@ -148,6 +154,10 @@ public final class GlassRenderer {
         float panelY = height - (panel.y + panel.height) * scale;
         float panelWidth = panel.width * scale;
         float panelHeight = panel.height * scale;
+        physicalPanelX = (int) Math.floor(panelX);
+        physicalPanelY = (int) Math.floor(panelY);
+        physicalPanelWidth = (int) Math.ceil(panelX + panelWidth) - physicalPanelX;
+        physicalPanelHeight = (int) Math.ceil(panelY + panelHeight) - physicalPanelY;
         int mode = (int) UI.liquidGlassMode.getValue();
         float tint = mode == 0 ? (panel.light ? 0.00f : 0.01f) : (panel.light ? 0.85f : 0.89f);
         float surface = 0.28f + panel.opacity * 0.62f;
@@ -164,12 +174,11 @@ public final class GlassRenderer {
     }
 
     private static void uploadBlur(GpuBuffer buffer, float x, float y) {
-        float[] weights = gaussian(BLUR_RADIUS);
         try (GpuBuffer.MappedView mapped = RenderSystem.getDevice().createCommandEncoder().mapBuffer(buffer, false, true)) {
             Std140Builder builder = Std140Builder.intoBuffer(mapped.data());
             builder.putVec4(x, y, BLUR_RADIUS, 0.0f);
             for (int index = 0; index <= MAX_RADIUS; index++) {
-                builder.putFloat(index <= BLUR_RADIUS ? weights[index] : 0.0f);
+                builder.putFloat(index <= BLUR_RADIUS ? BLUR_WEIGHTS[index] : 0.0f);
                 builder.align(16);
             }
         }
@@ -194,8 +203,11 @@ public final class GlassRenderer {
 
     private static void runBlur(RenderTarget mainTarget) {
         var encoder = RenderSystem.getDevice().createCommandEncoder();
-        draw(encoder, blurTempView, blurPipeline, blurXConfig, "DiffuseSampler", mainTarget.getColorTextureView());
-        draw(encoder, blurredView, blurPipeline, blurYConfig, "DiffuseSampler", blurTempView);
+        int refractionMargin = Math.max(64, (int) Math.ceil(mainTarget.height * 0.06));
+        draw(encoder, blurTempView, blurPipeline, blurXConfig, "DiffuseSampler", mainTarget.getColorTextureView(),
+                blurArea(mainTarget, refractionMargin + BLUR_RADIUS));
+        draw(encoder, blurredView, blurPipeline, blurYConfig, "DiffuseSampler", blurTempView,
+                blurArea(mainTarget, refractionMargin));
     }
 
     private static void composite(RenderTarget mainTarget) {
@@ -209,20 +221,35 @@ public final class GlassRenderer {
             var sampler = RenderSystem.getSamplerCache().getClampToEdge(FilterMode.LINEAR);
             pass.bindTexture("Sampler0", mainTarget.getColorTextureView(), sampler);
             pass.bindTexture("Sampler1", blurredView, sampler);
+            applyScissor(pass, blurArea(mainTarget, SHADOW_MARGIN));
             drawQuad(pass);
         }
     }
 
     private static void draw(com.mojang.blaze3d.systems.CommandEncoder encoder, GpuTextureView output,
-                             RenderPipeline pipeline, GpuBuffer config, String samplerName, GpuTextureView input) {
+                             RenderPipeline pipeline, GpuBuffer config, String samplerName, GpuTextureView input,
+                             Scissor area) {
         try (RenderPass pass = encoder.createRenderPass(() -> "frosty liquid glass blur", output, OptionalInt.empty())) {
             pass.setPipeline(pipeline);
             RenderSystem.bindDefaultUniforms(pass);
             pass.setUniform("SamplerInfo", samplerInfo);
             pass.setUniform("BlurConfig", config);
             pass.bindTexture(samplerName, input, RenderSystem.getSamplerCache().getClampToEdge(FilterMode.LINEAR));
+            applyScissor(pass, area);
             drawQuad(pass);
         }
+    }
+
+    private static Scissor blurArea(RenderTarget target, int margin) {
+        int x0 = Math.clamp(physicalPanelX - margin, 0, target.width);
+        int y0 = Math.clamp(physicalPanelY - margin, 0, target.height);
+        int x1 = Math.clamp(physicalPanelX + physicalPanelWidth + margin, 0, target.width);
+        int y1 = Math.clamp(physicalPanelY + physicalPanelHeight + margin, 0, target.height);
+        return new Scissor(x0, y0, Math.max(0, x1 - x0), Math.max(0, y1 - y0));
+    }
+
+    private static void applyScissor(RenderPass pass, Scissor area) {
+        pass.enableScissor(area.x, area.y, area.width, area.height);
     }
 
     private static void drawQuad(RenderPass pass) {
@@ -244,5 +271,8 @@ public final class GlassRenderer {
     }
 
     private record Panel(float x, float y, float width, float height, float radius, boolean light, float opacity) {
+    }
+
+    private record Scissor(int x, int y, int width, int height) {
     }
 }
