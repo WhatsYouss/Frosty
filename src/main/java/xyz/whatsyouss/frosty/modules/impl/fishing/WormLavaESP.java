@@ -1,4 +1,4 @@
-package xyz.whatsyouss.frosty.modules.impl.render;
+package xyz.whatsyouss.frosty.modules.impl.fishing;
 
 import meteordevelopment.orbit.EventHandler;
 import net.minecraft.core.BlockPos;
@@ -34,7 +34,7 @@ public class WormLavaESP extends Module {
     private long lastScanTime = 0L;
 
     public WormLavaESP() {
-        super("WormLavaESP", "蠕虫岩浆透视", category.Render);
+        super("WormLavaESP", "蠕虫岩浆透视", category.Fishing);
 
         this.registerSetting(scanRange = new SliderSetting("Scan Range", 64, 32, 512, 4, "扫描范围"));
     }

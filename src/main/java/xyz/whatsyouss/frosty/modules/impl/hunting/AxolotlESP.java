@@ -1,4 +1,4 @@
-package xyz.whatsyouss.frosty.modules.impl.render;
+package xyz.whatsyouss.frosty.modules.impl.hunting;
 
 import meteordevelopment.orbit.EventHandler;
 import com.mojang.blaze3d.vertex.PoseStack;
@@ -14,7 +14,7 @@ import java.awt.Color;
 public class AxolotlESP extends Module {
 
     public AxolotlESP() {
-        super("AxolotlESP","美西螈透视", category.Render);
+        super("AxolotlESP","美西螈透视", category.Hunting);
     }
 
     @EventHandler

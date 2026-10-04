@@ -20,6 +20,7 @@ import xyz.whatsyouss.frosty.Frosty;
 import xyz.whatsyouss.frosty.events.impl.BreakBlockEvent;
 import xyz.whatsyouss.frosty.events.impl.StartBreakingBlockEvent;
 import xyz.whatsyouss.frosty.modules.ModuleManager;
+import xyz.whatsyouss.frosty.modules.impl.farming.FarmingStats;
 import xyz.whatsyouss.frosty.utility.Utils;
 
 import static xyz.whatsyouss.frosty.Frosty.mc;
@@ -48,13 +49,24 @@ public abstract class MultiPlayerGameModeMixin {
     private void onAttackBlock(BlockPos pos, Direction direction, CallbackInfoReturnable<Boolean> cir) {
         if (Frosty.EVENT_BUS.post(StartBreakingBlockEvent.get(pos, direction)).isCancelled()) {
             cir.cancel();
+        } else {
+            FarmingStats.onBreakClick(mc, pos);
         }
     }
 
     @Inject(method = "destroyBlock", at = @At("HEAD"), cancellable = true)
     private void onBreakBlock(BlockPos blockPos, CallbackInfoReturnable<Boolean> cir) {
         if (Frosty.EVENT_BUS.post(BreakBlockEvent.get(blockPos)).isCancelled()) {
+            FarmingStats.discardBreakClick(blockPos);
             cir.setReturnValue(false);
+        } else {
+            FarmingStats.onImmediateBreak(blockPos);
         }
     }
+
+    @Inject(method = "continueDestroyBlock", at = @At("HEAD"))
+    private void frosty$trackBreakContinue(BlockPos pos, Direction direction, CallbackInfoReturnable<Boolean> cir) {
+        FarmingStats.onBreakClick(mc, pos);
+    }
+
 }

@@ -31,7 +31,7 @@ public class SelectComponent extends Component {
 
         context.text(mc.font, setting.getTransName(), (int) (x + 2), (int) (y + height / 2 - 4), LiquidGlassStyle.isEnabled() ? LiquidGlassStyle.textColor() : isLight ? Color.BLACK.getRGB() : Color.WHITE.getRGB(), false);
 
-        int boxColor = isHovered ? new Color(200, 200, 200).getRGB() : new Color(180, 180, 180).getRGB();
+        int boxColor = isHovered ? 0xFFC8C8C8 : 0xFFB4B4B4;
         if (LiquidGlassStyle.isEnabled()) {
             LiquidGlassStyle.drawControl(context, x + width - 100, y, 90, height, expanded, isHovered);
         } else {
@@ -39,14 +39,17 @@ public class SelectComponent extends Component {
         }
 
         String currentOption = setting.getTransOptions()[(int) setting.getValue()];
-        context.text(mc.font, net.minecraft.network.chat.Component.literal(currentOption), (int) (x + width - 95), (int) (y + height / 2 - 4), LiquidGlassStyle.isEnabled() ? LiquidGlassStyle.textColor() : isLight ? Color.BLACK.getRGB() : Color.WHITE.getRGB(), false);
+        context.text(mc.font, currentOption, (int) (x + width - 95), (int) (y + height / 2 - 4), LiquidGlassStyle.isEnabled() ? LiquidGlassStyle.textColor() : isLight ? Color.BLACK.getRGB() : Color.WHITE.getRGB(), false);
 
-        context.text(mc.font, net.minecraft.network.chat.Component.literal(expanded ? "▲" : "▼"), (int) (x + width - 20), (int) (y + height / 2 - 4), isLight ? Color.BLACK.getRGB() : Color.WHITE.getRGB(), false);
+        context.text(mc.font, expanded ? "▲" : "▼", (int) (x + width - 20), (int) (y + height / 2 - 4), isLight ? Color.BLACK.getRGB() : Color.WHITE.getRGB(), false);
+    }
 
-        if (expanded) {
+    public void renderDropdown(GuiGraphicsExtractor context, int mouseX, int mouseY) {
+        if (expanded && isVisible()) {
+            boolean isLight = UI.clickGuiColor.getValue() == 0;
             if (LiquidGlassStyle.isEnabled()) {
                 LiquidGlassStyle.drawGlass(context, x + width - 100, y + height, 90,
-                        setting.getOptions().length * height, 5,
+                        setting.getOptions().length * height, 10,
                         isLight ? 0xD8EAF2FF : 0xD624334D);
             } else {
                 context.fill((int) (x + width - 100), (int) (y + height),
@@ -68,7 +71,7 @@ public class SelectComponent extends Component {
                             optionHovered ? 0xFF4444AA : 0xFF333333);
                 }
 
-                context.text(mc.font, net.minecraft.network.chat.Component.literal(setting.getTransOptions()[i]),
+                context.text(mc.font, setting.getTransOptions()[i],
                         (int) (x + width - 95), optionY + (int) (height / 2 - 4),
                         LiquidGlassStyle.isEnabled() ? LiquidGlassStyle.textColor() : 0xFFFFFFFF, false);
             }

@@ -29,13 +29,13 @@ public class KeyBindComponent extends Component {
         String text = listening ? (UI.lang.getValue() == 1 ? "请按下按键" : "Listening...") : setting.getKeyText();
         context.text(mc.font, UI.lang.getValue() == 1 ? "开关" : "Bind", (int) (x + 2), (int) (y + height / 2 - 4), LiquidGlassStyle.isEnabled() ? LiquidGlassStyle.textColor() : isLight ? Color.BLACK.getRGB() : Color.WHITE.getRGB(), false);
 
-        int boxColor = isHovered ? new Color(200, 200, 200).getRGB() : new Color(180, 180, 180).getRGB();
+        int boxColor = isHovered ? 0xFFC8C8C8 : 0xFFB4B4B4;
         if (LiquidGlassStyle.isEnabled()) {
             LiquidGlassStyle.drawControl(context, x + width - 70, y, 60, height, listening, isHovered);
         } else {
             context.fill((int) (x + width - 70), (int) y, (int) (x + width - 10), (int) (y + height), boxColor);
         }
-        context.text(mc.font, net.minecraft.network.chat.Component.literal(text), (int) (x + width - 65), (int) (y + height / 2 - 4), LiquidGlassStyle.isEnabled() ? LiquidGlassStyle.textColor() : isLight ? Color.BLACK.getRGB() : Color.WHITE.getRGB(), false);
+        context.text(mc.font, text, (int) (x + width - 65), (int) (y + height / 2 - 4), LiquidGlassStyle.isEnabled() ? LiquidGlassStyle.textColor() : isLight ? 0xFF000000 : 0xFFFFFFFF, false);
     }
 
 

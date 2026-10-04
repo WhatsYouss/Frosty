@@ -47,11 +47,11 @@ public class CategoryComponent extends Component {
 
         int color;
         if (selected) {
-            color = isLight ? new Color(100, 100, 255).getRGB() : new Color(60, 60, 180).getRGB();
+            color = isLight ? 0xFF6464FF : 0xFF3C3CB4;
         } else if (isHovered) {
-            color = isLight ? new Color(200, 200, 200).getRGB() : new Color(120, 120, 120).getRGB();
+            color = isLight ? 0xFFC8C8C8 : 0xFF787878;
         } else {
-            color = isLight ? new Color(180, 180, 180).getRGB() : new Color(80, 80, 80).getRGB();
+            color = isLight ? 0xFFB4B4B4 : 0xFF505050;
         }
 
         if (LiquidGlassStyle.isEnabled()) {
@@ -61,10 +61,10 @@ public class CategoryComponent extends Component {
         }
         String displayName = UI.lang.getValue() == 1 ? getChineseName(category) : category.name();
 
-        context.text(mc.font, net.minecraft.network.chat.Component.literal(displayName),
+        context.text(mc.font, displayName,
                 (int) (x + width / 2 - (float) mc.font.width(displayName) / 2),
                 (int) (y + height / 2 - 4), LiquidGlassStyle.isEnabled()
-                        ? LiquidGlassStyle.textColor() : isLight ? Color.BLACK.getRGB() : Color.WHITE.getRGB(), false);
+                ? LiquidGlassStyle.textColor() : isLight ? 0xFF000000 : 0xFFFFFFFF, false);
     }
 
     @Override

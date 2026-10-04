@@ -43,6 +43,7 @@
     "MouseHandlerMixin",
     "MultiPlayerGameModeMixin",
     "PackMixin",
+    "ClientPacketListenerMixin",
     "PlayerInfoMixin",
     "PlayerMixin",
     "ScreenEffectRendererMixin",

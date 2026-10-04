@@ -6,8 +6,6 @@ import xyz.whatsyouss.frosty.modules.Module;
 import xyz.whatsyouss.frosty.modules.impl.client.UI;
 import xyz.whatsyouss.frosty.settings.Setting;
 
-import java.util.Arrays;
-
 public class SelectSetting extends Setting {
     private String name, cnName;
     private String[] options, cnOptions;
@@ -61,7 +59,7 @@ public class SelectSetting extends Setting {
     }
 
     public String[] getTransOptions() {
-        if (this.cnName != null && !Arrays.stream(this.cnOptions).toList().isEmpty() && UI.lang.getValue() == 1) {
+        if (this.cnName != null && this.cnOptions != null && this.cnOptions.length > 0 && UI.lang.getValue() == 1) {
             return this.cnOptions;
         }
         return this.options;
@@ -71,7 +69,7 @@ public class SelectSetting extends Setting {
         if (options == null && cnOptions == null || defaultValue < 0 || defaultValue >= options.length) {
             return null;
         }
-        if (this.cnName != null && !Arrays.stream(this.cnOptions).toList().isEmpty() && UI.lang.getValue() == 1) {
+        if (this.cnName != null && this.cnOptions != null && this.cnOptions.length > 0 && UI.lang.getValue() == 1) {
             return cnOptions[(int) defaultValue];
         }
         return options[(int) defaultValue];

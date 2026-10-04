@@ -2,11 +2,11 @@ package xyz.whatsyouss.frosty.gui.component.impl;
 
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import xyz.whatsyouss.frosty.gui.LiquidGlassStyle;
+import xyz.whatsyouss.frosty.gui.SmoothRoundedRenderer;
 import xyz.whatsyouss.frosty.gui.component.Component;
 import xyz.whatsyouss.frosty.modules.ModuleManager;
 import xyz.whatsyouss.frosty.modules.impl.client.UI;
 import xyz.whatsyouss.frosty.settings.impl.SliderSetting;
-import xyz.whatsyouss.frosty.utility.RenderUtils;
 
 import java.awt.*;
 
@@ -16,6 +16,14 @@ public class SliderComponent extends Component {
     private final SliderSetting setting;
     private boolean draggingMin;
     private boolean draggingMax;
+    private String cachedDisplayText;
+    private String cachedName;
+    private String cachedSuffix;
+    private double cachedMin = Double.NaN;
+    private double cachedMax = Double.NaN;
+    private double cachedValue = Double.NaN;
+    private boolean cachedRange;
+    private boolean cachedGlass;
 
     public SliderComponent(SliderSetting setting, float x, float y, float width, float height) {
         super(x, y, width, height);
@@ -37,10 +45,10 @@ public class SliderComponent extends Component {
         float sliderEndX = x + width - 5;
         float sliderWidth = sliderEndX - sliderStartX;
         if (LiquidGlassStyle.isEnabled()) {
-            RenderUtils.drawRoundedRect(context, sliderStartX, sliderY, sliderWidth, 3, 2,
+            SmoothRoundedRenderer.fill(context, sliderStartX, sliderY, sliderWidth, 3, 2,
                     isLight ? 0x7091A5C8 : 0x705D7198);
         } else {
-            context.fill((int) sliderStartX, sliderY, (int) sliderEndX, sliderY + 3, new Color(180, 180, 180).getRGB());
+            context.fill((int) sliderStartX, sliderY, (int) sliderEndX, sliderY + 3, 0xFFB4B4B4);
         }
 
         if (setting.isRange()) {
@@ -73,32 +81,51 @@ public class SliderComponent extends Component {
             drawSliderKnob(context, sliderStartX + pos, sliderY);
         }
 
-        double displayMin = displayValue(setting.getInputMin());
-        double displayMax = displayValue(setting.getInputMax());
-        double displayValue = displayValue(setting.getInput());
-        String displayText = setting.getTransName() + ": " + (setting.isRange() ?
-                String.format("%.2f-%.2f", displayMin, displayMax) : String.format("%.2f", displayValue)) + setting.getSuffix();
-        context.text(mc.font, net.minecraft.network.chat.Component.literal(displayText), (int) (x + 2), (int) (y + height / 2 - 4), LiquidGlassStyle.isEnabled() ? LiquidGlassStyle.textColor() : isLight ? Color.BLACK.getRGB() : Color.WHITE.getRGB(), false);
+        context.text(mc.font, displayText(), (int) (x + 2), (int) (y + height / 2 - 4), LiquidGlassStyle.isEnabled() ? LiquidGlassStyle.textColor() : isLight ? 0xFF000000 : 0xFFFFFFFF, false);
+    }
+
+    private String displayText() {
+        double min = setting.getInputMin();
+        double max = setting.getInputMax();
+        double value = setting.getInput();
+        boolean range = setting.isRange();
+        boolean glass = LiquidGlassStyle.isEnabled();
+        String name = setting.getTransName();
+        String suffix = setting.getSuffix();
+        if (cachedDisplayText == null || min != cachedMin || max != cachedMax || value != cachedValue
+                || range != cachedRange || glass != cachedGlass || !name.equals(cachedName) || !suffix.equals(cachedSuffix)) {
+            cachedDisplayText = name + ": " + (range
+                    ? String.format("%.2f-%.2f", displayValue(min), displayValue(max))
+                    : String.format("%.2f", displayValue(value))) + suffix;
+            cachedMin = min;
+            cachedMax = max;
+            cachedValue = value;
+            cachedRange = range;
+            cachedGlass = glass;
+            cachedName = name;
+            cachedSuffix = suffix;
+        }
+        return cachedDisplayText;
     }
 
     private void drawSliderRange(GuiGraphicsExtractor context, double start, double end, int sliderY) {
         if (LiquidGlassStyle.isEnabled()) {
             float rangeWidth = (float) (end - start);
-            RenderUtils.drawRoundedRect(context, (float) start, sliderY, rangeWidth, 3,
+            SmoothRoundedRenderer.fill(context, (float) start, sliderY, rangeWidth, 3,
                     2, LiquidGlassStyle.accentColor());
         } else {
-            context.fill((int) start, sliderY, (int) end, sliderY + 3, new Color(100, 100, 255).getRGB());
+            context.fill((int) start, sliderY, (int) end, sliderY + 3, 0xFF6464FF);
         }
     }
 
     private void drawSliderKnob(GuiGraphicsExtractor context, double position, int sliderY) {
         if (LiquidGlassStyle.isEnabled()) {
-            RenderUtils.drawRoundedRect(context, (float) position - 3, sliderY - 3, 6, 8,
+            SmoothRoundedRenderer.fill(context, (float) position - 3, sliderY - 3, 6, 8,
                     3, 0xFFEAF2FF);
-            RenderUtils.drawRoundedBorder(context, (float) position - 3, sliderY - 3, 6, 8,
+            SmoothRoundedRenderer.border(context, (float) position - 3, sliderY - 3, 6, 8,
                     3, LiquidGlassStyle.accentColor());
         } else {
-            context.fill((int) position - 2, sliderY - 2, (int) position + 2, sliderY + 5, Color.BLUE.getRGB());
+            context.fill((int) position - 2, sliderY - 2, (int) position + 2, sliderY + 5, 0xFF0000FF);
         }
     }
 

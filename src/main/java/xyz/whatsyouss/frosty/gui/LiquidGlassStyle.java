@@ -2,11 +2,10 @@ package xyz.whatsyouss.frosty.gui;
 
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import xyz.whatsyouss.frosty.modules.impl.client.UI;
-import xyz.whatsyouss.frosty.utility.RenderUtils;
 
 public final class LiquidGlassStyle {
-    private static final float PANEL_RADIUS = 10.0f;
-    private static final float CONTROL_RADIUS = 5.0f;
+    private static final float PANEL_RADIUS = 16.0f;
+    private static final float CONTROL_RADIUS = 7.0f;
 
     private LiquidGlassStyle() {
     }
@@ -34,8 +33,15 @@ public final class LiquidGlassStyle {
 
     public static void drawHeader(GuiGraphicsExtractor context, float x, float y,
                                   float width, float height) {
-        drawGlass(context, x, y, width, height, PANEL_RADIUS,
+        SmoothRoundedRenderer.topFill(context, x + 1, y + 2, width, height, PANEL_RADIUS,
+                0x18000000);
+        SmoothRoundedRenderer.topFill(context, x, y, width, height, PANEL_RADIUS,
                 isLight() ? 0x78678CFF : 0x8A2A4A95);
+        SmoothRoundedRenderer.topBorder(context, x, y, width, height, PANEL_RADIUS,
+                isLight() ? 0x70FFFFFF : 0x60CFE1FF);
+        SmoothRoundedRenderer.fill(context, x + PANEL_RADIUS, y + 2,
+                width - PANEL_RADIUS * 2, Math.min(3.0f, height - 4), 2.0f,
+                0x1AFFFFFF);
     }
 
     public static void drawControl(GuiGraphicsExtractor context, float x, float y,
@@ -52,15 +58,37 @@ public final class LiquidGlassStyle {
         drawGlass(context, x, y, width, height, CONTROL_RADIUS, color);
     }
 
+    public static void drawInsetBackground(GuiGraphicsExtractor context, float x, float y,
+                                           float width, float height, boolean hasFirstRow) {
+        SmoothRoundedRenderer.fill(context, x + 1, y + 2, width, height, CONTROL_RADIUS,
+                0x18000000);
+        SmoothRoundedRenderer.fill(context, x, y, width, height, CONTROL_RADIUS,
+                isLight() ? 0x28FFFFFF : 0x3024334D);
+        if (hasFirstRow) {
+            context.enableScissor((int) Math.floor(x), (int) Math.ceil(y + CONTROL_RADIUS + 1),
+                    (int) Math.ceil(x + width), (int) Math.ceil(y + height));
+        }
+        SmoothRoundedRenderer.border(context, x, y, width, height, CONTROL_RADIUS,
+                isLight() ? 0x70FFFFFF : 0x60CFE1FF);
+        if (hasFirstRow) context.disableScissor();
+    }
+
+    public static void drawControlBorder(GuiGraphicsExtractor context, float x, float y,
+                                         float width, float height, int color) {
+        SmoothRoundedRenderer.border(context, x, y, width, height, CONTROL_RADIUS, color);
+    }
+
     public static void drawGlass(GuiGraphicsExtractor context, float x, float y,
                                  float width, float height, float radius, int fillColor) {
-        RenderUtils.drawRoundedRect(context, x + 1, y + 2, width, height, radius,
+        SmoothRoundedRenderer.fill(context, x + 1, y + 2, width, height, radius,
                 0x18000000);
-        RenderUtils.drawRoundedRect(context, x, y, width, height, radius, fillColor);
-        RenderUtils.drawRoundedBorder(context, x, y, width, height, radius,
+        SmoothRoundedRenderer.fill(context, x, y, width, height, radius, fillColor);
+        SmoothRoundedRenderer.border(context, x, y, width, height, radius,
                 isLight() ? 0x70FFFFFF : 0x60CFE1FF);
-        RenderUtils.drawRoundedRect(context, x + 2, y + 2, width - 4,
-                Math.min(3.0f, height - 4), Math.min(2.0f, radius - 2),
+        float highlightInset = Math.max(2.0f, (float) Math.ceil(radius * 0.5f));
+        SmoothRoundedRenderer.fill(context, x + highlightInset, y + 2,
+                width - highlightInset * 2, Math.min(3.0f, height - 4),
+                Math.min(2.0f, radius - 2),
                 0x1AFFFFFF);
     }
 
