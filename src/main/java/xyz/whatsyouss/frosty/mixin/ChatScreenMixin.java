@@ -10,6 +10,8 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import xyz.whatsyouss.frosty.modules.ModuleManager;
 import xyz.whatsyouss.frosty.interfaces.IChatComponent;
+import xyz.whatsyouss.frosty.modules.impl.client.ChatCopier;
+import xyz.whatsyouss.frosty.modules.impl.client.UI;
 import xyz.whatsyouss.frosty.utility.Utils;
 
 import static xyz.whatsyouss.frosty.Frosty.mc;
@@ -26,9 +28,24 @@ public abstract class ChatScreenMixin {
         Component message = findMessageAt(chat, event.x(), event.y(), mc.getWindow().getGuiScaledHeight());
 
         if (message != null) {
-            Utils.addToClipboard(ModuleManager.chatCopier.stripColorCode.isEnabled ? Utils.stripColor(message.getString()) : message.getString());
-            cir.setReturnValue(true);
+            String str = ModuleManager.chatCopier.stripColorCode.isEnabled ? Utils.stripColor(message.getString()) : message.getString();
+            try {
+                mc.keyboardHandler.setClipboard(str);
+                if (ChatCopier.copiedMessageInChat.isToggled()) {
+                    Utils.addModuleMessage(ModuleManager.chatCopier.getTransName(), "§bCopied§f: '" + str + "' §bto clipboard", "§b已将§f: '" + str + "' §b复制到剪贴板");
+                } else {
+                    if (UI.lang.getValue() == 1) {
+                        mc.player.sendOverlayMessage(Component.literal("§b已将§f: '" + str + "' §b复制到剪贴板"));
+                    } else {
+                        mc.player.sendOverlayMessage(Component.literal("§bCopied§f: '" + str + "' §bto clipboard"));
+                    }
+                }
+            } catch (Exception e) {
+                Utils.addModuleMessage(ModuleManager.chatCopier.getTransName(), "§cFailed to copy '" + str + "': " + e.getMessage());
+                e.printStackTrace();
+            }
         }
+        cir.setReturnValue(true);
     }
 
     private static Component findMessageAt(ChatComponent chat, double mouseX, double mouseY, int screenHeight) {

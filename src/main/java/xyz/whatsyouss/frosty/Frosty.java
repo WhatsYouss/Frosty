@@ -7,12 +7,12 @@ import net.fabricmc.api.ModInitializer;
 
 import net.minecraft.client.Minecraft;
 import com.mojang.blaze3d.platform.NativeImage;
-import net.minecraft.client.renderer.texture.DynamicTexture;
 import net.minecraft.client.renderer.texture.SimpleTexture;
 import net.minecraft.resources.Identifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import xyz.whatsyouss.frosty.commands.CommandManager;
+import xyz.whatsyouss.frosty.commands.FrostyCommand;
 import xyz.whatsyouss.frosty.config.ConfigManager;
 import xyz.whatsyouss.frosty.events.impl.PreUpdateEvent;
 import xyz.whatsyouss.frosty.events.impl.SettingUpdateEvent;
@@ -28,7 +28,7 @@ import java.util.function.Supplier;
 
 public class Frosty implements ModInitializer {
 	public static final String MOD_ID = "frosty";
-	public static final String MOD_VERSION = "1.3.1";
+	public static final String MOD_VERSION = "1.3.2";
 	public static Minecraft mc;
 	public static final IEventBus EVENT_BUS = new EventBus();
 	boolean applied = false;
@@ -73,6 +73,7 @@ public class Frosty implements ModInitializer {
 		mc = Minecraft.getInstance();
 		moduleManager.register();
 		commandManager.register();
+		FrostyCommand.register();
 		EVENT_BUS.registerLambdaFactory("xyz.whatsyouss.frosty", (lookupInMethod, klass) -> (MethodHandles.Lookup) lookupInMethod.invoke(null, klass, MethodHandles.lookup()));
 		EVENT_BUS.subscribe(this);
 		EVENT_BUS.subscribe(new Rotations());

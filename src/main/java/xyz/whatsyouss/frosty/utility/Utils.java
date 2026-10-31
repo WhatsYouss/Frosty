@@ -13,6 +13,7 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Items;
 import net.minecraft.network.chat.Style;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.chat.TextColor;
 import net.minecraft.ChatFormatting;
 import net.minecraft.util.Mth;
@@ -37,8 +38,13 @@ import org.jetbrains.annotations.Nullable;
 import org.joml.Matrix4f;
 import org.joml.Vector3d;
 import xyz.whatsyouss.frosty.mixin.accessor.MinecraftAccessor;
+import xyz.whatsyouss.frosty.modules.ModuleManager;
+import xyz.whatsyouss.frosty.modules.impl.client.ChatCopier;
+import xyz.whatsyouss.frosty.modules.impl.client.Commands;
 import xyz.whatsyouss.frosty.modules.impl.client.UI;
 import xyz.whatsyouss.frosty.settings.impl.SliderSetting;
+
+import static xyz.whatsyouss.frosty.Frosty.mc;
 
 public class Utils {
     private static final Minecraft mc = Minecraft.getInstance();
@@ -47,24 +53,53 @@ public class Utils {
     private static final Pattern SB_LEVEL_PATTERN = Pattern.compile("(§.)*\\[([0-9]+)\\](§.)*");
     private static ProjectionMatrixBuffer matrixBuffer;
 
-    public static void addChatMessage(String message) {
+    private static Component chatPrefix() {
+        final String name = "Frosty";
+        Theme theme = ModuleManager.hud != null ? ModuleManager.hud.getSelectedTheme() : Theme.Royal;
+        MutableComponent prefix = Component.literal("[").withStyle(ChatFormatting.GRAY);
+
+        for (int i = 0; i < name.length(); i++) {
+            int rgb;
+            if (theme == Theme.Rainbow) {
+                float baseHue = (System.currentTimeMillis() % 6000L) / 6000.0f;
+                float hue = (baseHue + i / (float) name.length()) % 1.0f;
+                rgb = Color.HSBtoRGB(hue, 0.85f, 1.0f) & 0xFFFFFF;
+            } else {
+                float progress = name.length() == 1 ? 0.0f : i / (float) (name.length() - 1);
+                Color start = theme.getFirstGradient();
+                Color end = theme.getSecondGradient();
+                int red = Math.round(start.getRed() + (end.getRed() - start.getRed()) * progress);
+                int green = Math.round(start.getGreen() + (end.getGreen() - start.getGreen()) * progress);
+                int blue = Math.round(start.getBlue() + (end.getBlue() - start.getBlue()) * progress);
+                rgb = (red << 16) | (green << 8) | blue;
+            }
+            prefix.append(Component.literal(String.valueOf(name.charAt(i)))
+                    .withStyle(Style.EMPTY.withColor(TextColor.fromRgb(rgb))));
+        }
+
+        return prefix.append(Component.literal("] ").withStyle(ChatFormatting.GRAY));
+    }
+
+    private static void sendFrostyMessage(String message) {
         if (mc.player != null) {
-            mc.player.sendSystemMessage(Component.literal("§7[§9F§br§9o§bs§9t§by§7] " + message));
+            mc.player.sendSystemMessage(chatPrefix().copy().append(Component.literal(message)));
         }
     }
 
+    public static void addChatMessage(String message) {
+        sendFrostyMessage(message);
+    }
+
     public static void addModuleMessage(String moduleName, String message) {
-        if (mc.player != null) {
-            mc.player.sendSystemMessage(Component.literal("§7[§9F§br§9o§bs§9t§by§7] " + "§7[§f§l" + moduleName + "§7] " + message));
-        }
+        sendFrostyMessage("§7[§f§l" + moduleName + "§7] " + message);
     }
 
     public static void addChatMessage(String message, String messageCN) {
         if (mc.player != null) {
             if (UI.lang.getValue() == 1) {
-                mc.player.sendSystemMessage(Component.literal("§7[§9F§br§9o§bs§9t§by§7] " + messageCN));
+                sendFrostyMessage(messageCN);
             } else {
-                mc.player.sendSystemMessage(Component.literal("§7[§9F§br§9o§bs§9t§by§7] " + message));
+                sendFrostyMessage(message);
             }
         }
     }
@@ -72,9 +107,9 @@ public class Utils {
     public static void addModuleMessage(String moduleName, String message, String messageCN) {
         if (mc.player != null) {
             if (UI.lang.getValue() == 1) {
-                mc.player.sendSystemMessage(Component.literal("§7[§9F§br§9o§bs§9t§by§7] " + "§7[§f§l" + moduleName + "§7] " + messageCN));
+                sendFrostyMessage("§7[§f§l" + moduleName + "§7] " + messageCN);
             } else {
-                mc.player.sendSystemMessage(Component.literal("§7[§9F§br§9o§bs§9t§by§7] " + "§7[§f§l" + moduleName + "§7] " + message));
+                sendFrostyMessage("§7[§f§l" + moduleName + "§7] " + message);
             }
         }
     }
@@ -385,13 +420,22 @@ public class Utils {
     public static void addToClipboard(String str) {
         try {
             mc.keyboardHandler.setClipboard(str);
-            mc.player.sendOverlayMessage(Component.literal("§bCopied§f: '" + str + "' §bto clipboard"));
+            if (ModuleManager.commands.copiedMessageInChat.isToggled()) {
+                Utils.addChatMessage("§bCopied§f: '" + str + "' §bto clipboard", "§b已将§f: '" + str + "' §b复制到剪贴板");
+            } else {
+                if (UI.lang.getValue() == 1) {
+                    mc.player.sendOverlayMessage(Component.literal("§b已将§f: '" + str + "' §b复制到剪贴板"));
+                } else {
+                    mc.player.sendOverlayMessage(Component.literal("§bCopied§f: '" + str + "' §bto clipboard"));
+                }
+            }
         }
         catch (Exception e) {
             Utils.addChatMessage("§cFailed to copy '" + str + "': " + e.getMessage());
             e.printStackTrace();
         }
     }
+
     public static String stripColor(String string) {
         if (string == null || string.isEmpty()) {
             return string;
