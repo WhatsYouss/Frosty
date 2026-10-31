@@ -1,0 +1,38 @@
+{
+	"schemaVersion": 1,
+	"id": "frosty",
+	"version": "${version}",
+	"name": "Frosty",
+	"description": "Skyblock QOL Mod",
+	"authors": [
+		"You"
+	],
+	"contributors": [
+		"mythic"
+	],
+	"contact": {
+		"homepage": "",
+		"sources": "https://github.com/WhatsYouss/Frosty"
+	},
+	"license": "GPL-3.0",
+	"icon": "assets/frosty/icon.png",
+	"environment": "*",
+	"entrypoints": {
+		"main": [
+			"xyz.whatsyouss.frosty.Frosty"
+		]
+	},
+	"mixins": [
+		"frosty.mixins.json"
+	],
+	"accessWidener": "frosty.accesswidener",
+	"depends": {
+		"fabricloader": ">=0.20.1",
+		"minecraft": "26.3",
+		"java": ">=25",
+		"fabric-api": "*"
+	},
+	"suggests": {
+		"another-mod": "*"
+	}
+}

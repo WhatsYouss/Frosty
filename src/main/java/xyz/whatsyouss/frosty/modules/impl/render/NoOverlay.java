@@ -1,0 +1,17 @@
+package xyz.whatsyouss.frosty.modules.impl.render;
+
+import xyz.whatsyouss.frosty.modules.Module;
+import xyz.whatsyouss.frosty.settings.impl.ButtonSetting;
+
+public class NoOverlay extends Module {
+
+    public ButtonSetting fire, water, inWall;
+
+    public NoOverlay() {
+        super("NoOverlay", "无视野遮挡", category.Render);
+
+        this.registerSetting(fire = new ButtonSetting("Fire", "火", true));
+        this.registerSetting(water = new ButtonSetting("Water", "水", true));
+        this.registerSetting(inWall = new ButtonSetting("In Wall", "墙内", true));
+    }
+}

@@ -1,0 +1,173 @@
+package xyz.whatsyouss.frosty.modules.impl.render;
+
+import meteordevelopment.orbit.EventHandler;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.Font;
+import net.minecraft.network.chat.Component;
+import net.minecraft.util.Mth;
+import org.joml.Matrix3x2fStack;
+import xyz.whatsyouss.frosty.events.impl.Render2DEvent;
+import xyz.whatsyouss.frosty.modules.Module;
+import xyz.whatsyouss.frosty.modules.ModuleManager;
+import xyz.whatsyouss.frosty.settings.impl.ButtonSetting;
+import xyz.whatsyouss.frosty.settings.impl.SelectSetting;
+import xyz.whatsyouss.frosty.settings.impl.SliderSetting;
+import xyz.whatsyouss.frosty.utility.Theme;
+import xyz.whatsyouss.frosty.utility.Utils;
+
+import java.util.Comparator;
+import java.util.List;
+import java.util.stream.Collectors;
+
+public class HUD extends Module {
+
+    private SelectSetting color;
+    private ButtonSetting flow, suffix, bar, background;
+    private SliderSetting opacity, offset;
+
+    private String[] colors = new String[] {"Rainbow", "Cherry", "Cotton candy", "Flare", "Flower", "Gold", "Grayscale", "Royal", "Sky", "Vine", "Urban"};
+    private String[] CNcolors = new String[] {"彩虹", "粉樱", "棉花糖", "炽焰", "繁花", "流金", "灰阶", "皇室蓝", "晴空", "青藤", "都市"};
+
+    private static int MARGIN = 5;
+    private static final int INFO_COLOR = 0xFFA0A0A0;
+    private int strColor;
+    private float SCALE;
+
+    public HUD() {
+        super("HUD", "界面", Module.category.Render);
+
+        this.registerSetting(offset = new SliderSetting("Offset", 2, 0, 5, 1, "位置偏移"));
+        this.registerSetting(color = new SelectSetting("Color", "颜色", 0, colors, CNcolors));
+        this.registerSetting(flow = new ButtonSetting("Gradient", "渐变", false));
+        this.registerSetting(suffix = new ButtonSetting("Suffix", "尾标", true));
+        this.registerSetting(bar = new ButtonSetting("Bar", "尾块", true));
+        this.registerSetting(background = new ButtonSetting("Background", "背景", true));
+        this.registerSetting(opacity = new SliderSetting("Opacity", "%", 50, 0, 100, 1, "透明度"));
+    }
+
+    @Override
+    public void guiUpdate() {
+        this.opacity.setVisibilityCondition(() -> background.isToggled());
+    }
+
+    @Override
+    public void onUpdate() {
+        strColor = getCurrentColor(0);
+    }
+
+    @EventHandler
+    public void onRender2D(Render2DEvent event) {
+        if (!Utils.nullCheck() || mc.gui.hud.isHidden()) {
+            return;
+        }
+
+        MARGIN = (int) offset.getInput();
+        SCALE = (float) mc.getWindow().getGuiScale();
+
+        Font textRenderer = mc.font;
+        Matrix3x2fStack matrices = event.drawContext.pose();
+
+        matrices.pushMatrix();
+
+        List<Module> sortedModules = ModuleManager.organizedModules.stream()
+                .filter(module -> module.isEnabled() && !module.isHidden())
+                .sorted(Comparator.comparingInt(this::getModuleDisplayLength).reversed())
+                .collect(Collectors.toList());
+
+        int extraOffset = bar.isToggled() ? 2 : 0;
+        int yPos = MARGIN;
+        int scaledWidth = mc.getWindow().getGuiScaledWidth();
+
+        for (int i = 0; i < sortedModules.size(); i++) {
+            Module module = sortedModules.get(i);
+            String moduleName = module.getNameInHud();
+            String info = module.getInfo();
+
+            int totalWidth = textRenderer.width(moduleName + (info.isEmpty() || !suffix.isToggled() ? "" : " " + info));
+            int xPos = scaledWidth - totalWidth - MARGIN - extraOffset;
+
+            int moduleColor;
+            if (flow.isToggled()) {
+                moduleColor = getCurrentColor(i);
+            } else {
+                moduleColor = strColor;
+            }
+
+            if (background.isToggled()) {
+                int alpha = (int) (25 + (opacity.getInput() / 100.0) * (125 - 25));
+                int backgroundColor = (alpha << 24) | 0x000000;
+                event.drawContext.fill(
+                        xPos - 2,
+                        yPos - 1,
+                        scaledWidth - MARGIN - extraOffset + 2,
+                        yPos + textRenderer.lineHeight + 1,
+                        backgroundColor
+                );
+            }
+
+            event.drawContext.text(textRenderer, Component.literal(moduleName), xPos, yPos, moduleColor, true);
+
+            if (!info.isEmpty() && suffix.isToggled()) {
+                int nameWidth = textRenderer.width(moduleName);
+                event.drawContext.text(textRenderer, Component.literal(" " + info), xPos + nameWidth,
+                        yPos, INFO_COLOR, true);
+            }
+
+            yPos += textRenderer.lineHeight + 2;
+        }
+
+        if (bar.isToggled()) {
+            yPos = MARGIN;
+            for (int i = 0; i < sortedModules.size(); i++) {
+                Module module = sortedModules.get(i);
+                int moduleColor;
+                if (flow.isToggled()) {
+                    moduleColor = getCurrentColor(i);
+                } else {
+                    moduleColor = strColor;
+                }
+
+                int barX = scaledWidth - 2;
+                int barY2 = yPos + textRenderer.lineHeight;
+                event.drawContext.fill(barX, yPos - 1, scaledWidth, barY2 + 1, moduleColor);
+
+                yPos += textRenderer.lineHeight + 2;
+            }
+        }
+
+        matrices.popMatrix();
+    }
+
+    private int getModuleDisplayLength(Module module) {
+        String displayText = module.getNameInHud() +
+                (module.getInfo().isEmpty() || !suffix.isToggled() ? "" : " " + module.getInfo());
+        return Minecraft.getInstance().font.width(displayText);
+    }
+
+    public Theme getSelectedTheme() {
+        int selectedIndex = Mth.clamp((int) color.getValue(), 0, Theme.values().length - 1);
+        return Theme.values()[selectedIndex];
+    }
+
+    private int getCurrentColor(int moduleIndex) {
+        Theme theme = getSelectedTheme();
+
+        if (flow.isToggled()) {
+            double offset = moduleIndex * 0.1;
+            double speed = 0.001;
+
+            if (theme == Theme.Rainbow) {
+                long delay = moduleIndex * 50L;
+                return Theme.getChroma(2, delay);
+            } else {
+                return theme.getAnimatedColor(offset, 255, speed);
+            }
+        } else {
+            if (theme == Theme.Rainbow) {
+                return Theme.getChroma(2, 0);
+            } else {
+                return theme.getAnimatedColor(0, 255, 0.001);
+            }
+        }
+    }
+}

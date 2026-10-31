@@ -1,0 +1,112 @@
+package xyz.whatsyouss.frosty.modules.impl.render;
+
+import jdk.jshell.execution.Util;
+import meteordevelopment.orbit.EventHandler;
+import net.minecraft.client.CameraType;
+import com.mojang.blaze3d.platform.InputConstants;
+import net.minecraft.util.Mth;
+import xyz.whatsyouss.frosty.events.impl.KeyEvent;
+import xyz.whatsyouss.frosty.events.impl.PreUpdateEvent;
+import xyz.whatsyouss.frosty.modules.Module;
+import xyz.whatsyouss.frosty.modules.impl.client.UI;
+import xyz.whatsyouss.frosty.settings.impl.SelectSetting;
+import xyz.whatsyouss.frosty.utility.Input;
+import xyz.whatsyouss.frosty.utility.Utils;
+
+public class FreeLook extends Module {
+
+    private String[] modes = new String[]{"Toggle", "Hold"};
+    private String[] CNmodes = new String[]{"开启", "按住"};
+
+    public SelectSetting mode;
+
+    public static boolean freelooking;
+    public float cameraYaw;
+    public float cameraPitch;
+    private int pers;
+    private boolean gotPers, setPers;
+
+    public FreeLook() {
+        super("FreeLook", "自由视角", category.Render, InputConstants.KEY_LALT);
+
+        this.registerSetting(mode = new SelectSetting("Mode", "模式", 0, modes, CNmodes));
+    }
+
+    @Override
+    public String getDesc() {
+        if (UI.lang.getValue() == 1) {
+            return "'按住' 模式需要保持模块开启";
+        }
+        return "mode 'Hold' needs module enabled";
+    }
+
+    @Override
+    public void onEnable() {
+        if (!Utils.nullCheck()) {
+            return;
+        }
+        cameraYaw = mc.player.getYRot();
+        cameraPitch = mc.player.getXRot();
+        if (mode.getValue() == 1) {
+            return;
+        }
+        if (mc.options.getCameraType() == CameraType.FIRST_PERSON) {
+            pers = 1;
+        } else if (mc.options.getCameraType() == CameraType.THIRD_PERSON_BACK) {
+            pers = 2;
+        } else {
+            pers = 3;
+        }
+        freelooking = true;
+    }
+
+    @Override
+    public void onDisable() {
+        if (!Utils.nullCheck()) {
+            return;
+        }
+        if (mode.getValue() == 1) {
+            return;
+        }
+        freelooking = false;
+        if (pers == 1) {
+            mc.options.setCameraType(CameraType.FIRST_PERSON);
+        }
+    }
+
+    @EventHandler
+    public void onPreUpdate(PreUpdateEvent event) {
+        if (!Utils.nullCheck()) {
+            return;
+        }
+        if (mode.getValue() == 1 && this.isEnabled()) {
+            if (Input.isKeyDown(this.getKeycode())) {
+                if (!gotPers) {
+                    if (mc.options.getCameraType() == CameraType.FIRST_PERSON) {
+                        pers = 1;
+                    } else if (mc.options.getCameraType() == CameraType.THIRD_PERSON_BACK) {
+                        pers = 2;
+                    } else {
+                        pers = 3;
+                    }
+                    gotPers = true;
+                    setPers = false;
+                }
+                freelooking = true;
+            } else {
+                freelooking = false;
+                gotPers = false;
+                if (pers == 1 && !setPers) {
+                    mc.options.setCameraType(CameraType.FIRST_PERSON);
+                }
+                setPers = true;
+            }
+        }
+        if (freelooking && mc.options.getCameraType() == CameraType.FIRST_PERSON) {
+            mc.options.setCameraType(CameraType.THIRD_PERSON_BACK);
+        }
+
+        mc.player.setXRot(Mth.clamp(mc.player.getXRot(), -90, 90));
+        cameraPitch = Mth.clamp(cameraPitch, -90, 90);
+    }
+}
