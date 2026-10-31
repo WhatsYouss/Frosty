@@ -43,8 +43,8 @@ public class FarmingMacro extends Module {
     private SelectSetting face, hold;
     private String[] FACES = new String[]{"North", "South", "East", "West", "Custom"};
     private String[] FACESCN = new String[]{"北", "南", "东", "西", "自定义"};
-    private String[] HOLDS = new String[]{"NONE", "W", "S"};
-    private String[] HOLDSCN = new String[]{"无", "W", "S"};
+    private String[] HOLDS = new String[]{"NONE", "W", "S", "A", "D"};
+    private String[] HOLDSCN = new String[]{"无", "W", "S", "A", "D"};
     private SliderSetting yaw, pitch, stopTime, triggerAmount;
     private ButtonSetting rotateOnFinish, pestCleaner, rewarpOnly;
 
@@ -221,11 +221,8 @@ public class FarmingMacro extends Module {
         if (running || awaitingStart) FarmingStats.tick(mc, isFarmingState());
 
         if (awaitingStart) {
-            if (mc.gui.screen() == null) {
-                awaitingStart = false;
-                running = true;
-                beginTurning();
-            }
+            if (pestPaused) return;
+            startWhenGrounded();
             return;
         }
         if (!running) {
@@ -265,6 +262,13 @@ public class FarmingMacro extends Module {
         }
 
         boolean farming = state == State.TURNING || state == State.MOVING || state == State.DWELLING;
+        if (farming && mc.player.getAbilities().flying) {
+            releaseAll();
+            running = false;
+            awaitingStart = true;
+            startWhenGrounded();
+            return;
+        }
         if (farming && ((MinecraftAccessor) mc).frosty$getMissTime() == 10000) {
             ((MinecraftAccessor) mc).frosty$setMissTime(0);
         }
@@ -465,6 +469,8 @@ public class FarmingMacro extends Module {
     public void resumeFromPestClean() {
         if (!pestPaused) return;
         pestPaused = false;
+        awaitingStart = false;
+        running = true;
 
         if (rewarpOnly.isToggled()) {
             if (pestCleanCompletedLap) {
@@ -643,8 +649,8 @@ public class FarmingMacro extends Module {
         // An opposite hold would cancel the waypoint key and stall the macro.
         setKeyPressed(mc.options.keyUp, key == mc.options.keyUp || (held == 1 && key != mc.options.keyDown));
         setKeyPressed(mc.options.keyDown, key == mc.options.keyDown || (held == 2 && key != mc.options.keyUp));
-        setKeyPressed(mc.options.keyLeft, key == mc.options.keyLeft);
-        setKeyPressed(mc.options.keyRight, key == mc.options.keyRight);
+        setKeyPressed(mc.options.keyLeft, key == mc.options.keyLeft || (held == 3 && key != mc.options.keyRight));
+        setKeyPressed(mc.options.keyRight, key == mc.options.keyRight || (held == 4 && key != mc.options.keyLeft));
     }
 
     private int randomStopTicks() {
@@ -675,11 +681,23 @@ public class FarmingMacro extends Module {
     private void prepareMouseForMacroStart() {
         mc.mouseHandler.releaseMouse();
         GLFW.glfwSetInputMode(mc.getWindow().handle(), GLFW.GLFW_CURSOR, GLFW.GLFW_CURSOR_NORMAL);
-        if (mc.gui.screen() == null) {
-            awaitingStart = false;
-            running = true;
-            beginTurning();
+        startWhenGrounded();
+    }
+
+    private void startWhenGrounded() {
+        releaseAll();
+        if (mc.gui.screen() != null) return;
+        if (mc.player.getAbilities().flying) {
+            mc.player.getAbilities().flying = false;
+            mc.player.onUpdateAbilities();
         }
+        if (!mc.player.onGround()) {
+            mc.options.keyShift.setDown(true);
+            return;
+        }
+        awaitingStart = false;
+        running = true;
+        beginTurning();
     }
 
     @EventHandler

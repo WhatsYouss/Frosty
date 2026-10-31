@@ -4,6 +4,7 @@ import meteordevelopment.orbit.EventHandler;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
 import net.minecraft.network.chat.Component;
+import net.minecraft.util.Mth;
 import org.joml.Matrix3x2fStack;
 import xyz.whatsyouss.frosty.events.impl.Render2DEvent;
 import xyz.whatsyouss.frosty.modules.Module;
@@ -143,9 +144,13 @@ public class HUD extends Module {
         return Minecraft.getInstance().font.width(displayText);
     }
 
+    public Theme getSelectedTheme() {
+        int selectedIndex = Mth.clamp((int) color.getValue(), 0, Theme.values().length - 1);
+        return Theme.values()[selectedIndex];
+    }
+
     private int getCurrentColor(int moduleIndex) {
-        int selectedIndex = (int) color.getValue();
-        Theme theme = Theme.values()[selectedIndex];
+        Theme theme = getSelectedTheme();
 
         if (flow.isToggled()) {
             double offset = moduleIndex * 0.1;
