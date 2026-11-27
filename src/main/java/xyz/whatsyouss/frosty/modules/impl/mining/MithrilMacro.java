@@ -30,6 +30,8 @@ import java.util.stream.Collectors;
 
 public class MithrilMacro extends Module {
 
+    private static final long FAILED_TARGET_COOLDOWN_MS = 1_200L;
+
     private final String[] mithrilTypes = new String[]{"Gray", "Prismarine", "Blue"};
     private final String[] CNmithrilTypes = new String[]{"灰色", "海晶石类", "蓝色"};
 
@@ -43,6 +45,8 @@ public class MithrilMacro extends Module {
     private BlockPos targetPos;
     private Block lastTarget;
     private Vec3 targetHitVec;
+    private BlockPos skippedTargetPos;
+    private long skippedTargetUntil;
 
     private boolean startPacketSent = false;
 
@@ -63,6 +67,8 @@ public class MithrilMacro extends Module {
 //            ModuleManager.commissionMacro.disable();
 //        }
         if (!Utils.nullCheck()) return;
+        skippedTargetPos = null;
+        skippedTargetUntil = 0L;
         toolSlot = -1;
         for (int i = 0; i < 9; i++) {
             var stack = mc.player.getInventory().getItem(i);
@@ -107,18 +113,21 @@ public class MithrilMacro extends Module {
             IKeyMapping.get(mc.options.keyAttack).setDown(true);
         }
 
-        if (targetPos != null && mc.level.getBlockState(targetPos).is(Blocks.BEDROCK))
+        if (targetPos != null && !isValidTarget(targetPos))
             resetTarget();
 
         if (targetPos != null
-                && System.currentTimeMillis() - targetStartTime > maxBreaktime.getInput() * 1000)
+                && System.currentTimeMillis() - targetStartTime > maxBreaktime.getInput() * 1000) {
+            skippedTargetPos = targetPos;
+            skippedTargetUntil = System.currentTimeMillis() + FAILED_TARGET_COOLDOWN_MS;
             resetTarget();
+        }
 
         if (targetPos == null) findBestTarget();
 
         if (targetPos != null && targetHitVec != null) {
             RotationUtils.aimByPos(targetHitVec, (float) rotateSmoothing.getInput() + 2);
-            if (isLookingAt(targetPos)) breakBlock(targetPos);
+            if (!aimCheck.isToggled() || isLookingAt(targetPos)) breakBlock(targetPos);
         }
     }
 
@@ -130,6 +139,8 @@ public class MithrilMacro extends Module {
             for (int y = -2; y <= 2; y++) {
                 for (int z = -3; z <= 3; z++) {
                     BlockPos pos = playerPos.offset(x, y, z);
+
+                    if (isTemporarilySkipped(pos)) continue;
 
                     if (mc.level.getBlockState(pos).getShape(mc.level, pos).isEmpty())
                         continue;
@@ -222,6 +233,19 @@ public class MithrilMacro extends Module {
 //            return (ModuleManager.commissionMacro.isEnabled() || titanium.isToggled()) ? 100 : 0;
             return (titanium.isToggled()) ? 100 : 0;
         return 0;
+    }
+
+    private boolean isValidTarget(BlockPos pos) {
+        return !mc.level.getBlockState(pos).getShape(mc.level, pos).isEmpty() && getWeight(pos) > 0;
+    }
+
+    private boolean isTemporarilySkipped(BlockPos pos) {
+        if (skippedTargetPos == null) return false;
+        if (System.currentTimeMillis() >= skippedTargetUntil) {
+            skippedTargetPos = null;
+            return false;
+        }
+        return skippedTargetPos.equals(pos);
     }
 
     private boolean isLookingAt(BlockPos pos) {

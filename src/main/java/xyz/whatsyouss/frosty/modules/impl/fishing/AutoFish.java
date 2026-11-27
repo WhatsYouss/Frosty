@@ -10,6 +10,7 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.decoration.ArmorStand;
 import net.minecraft.world.entity.monster.Slime;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.entity.projectile.FishingHook;
 import net.minecraft.world.item.FishingRodItem;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.phys.AABB;
@@ -144,7 +145,7 @@ public class AutoFish extends Module {
                 }
             }
             case 1 -> {
-                if (mc.player.fishing != null || rightClick()) {
+                if (hasActiveHook() || rightClick()) {
                     currentMode = 2;
                     waitStartTick = currentTick;
                 }
@@ -165,7 +166,7 @@ public class AutoFish extends Module {
                     return;
                 }
 
-                if (mc.player.fishing == null) {
+                if (!hasActiveHook()) {
                     if (currentTick - throwTick >= 20) {
                         currentMode = 1;
                     }
@@ -301,7 +302,7 @@ public class AutoFish extends Module {
 
     @Override
     public void onDisable() {
-        if (!failed && mc.player != null && mc.player.fishing != null && rodHand != null) {
+        if (!failed && hasActiveHook() && rodHand != null) {
             mc.gameMode.useItem(mc.player, rodHand);
             mc.player.swing(rodHand);
         }
@@ -339,6 +340,27 @@ public class AutoFish extends Module {
         mc.gameMode.useItem(mc.player, rodHand);
         mc.player.swing(rodHand);
         return true;
+    }
+
+    private boolean hasActiveHook() {
+        return getActiveHook() != null;
+    }
+
+    private FishingHook getActiveHook() {
+        if (mc.player == null || mc.level == null) return null;
+
+        if (mc.player.fishing != null && mc.player.fishing.isAlive()) {
+            return mc.player.fishing;
+        }
+
+        return mc.level.getEntitiesOfClass(
+                        FishingHook.class,
+                        mc.player.getBoundingBox().inflate(128.0),
+                        hook -> hook.isAlive() && hook.getOwner() == mc.player
+                )
+                .stream()
+                .findFirst()
+                .orElse(null);
     }
 
     private void beginReelScan() {
@@ -710,11 +732,14 @@ public class AutoFish extends Module {
     }
 
     private void checkForArmorStand() {
-        if (!Utils.nullCheck() || mc.player.fishing == null) return;
+        if (!Utils.nullCheck()) return;
+
+        FishingHook hook = getActiveHook();
+        if (hook == null) return;
 
         List<ArmorStand> armorStands = mc.level.getEntitiesOfClass(
                 ArmorStand.class,
-                mc.player.fishing.getBoundingBox().inflate(2.0),
+                hook.getBoundingBox().inflate(2.0),
                 stand -> true
         );
 
